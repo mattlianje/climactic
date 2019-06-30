@@ -52,8 +52,8 @@ with sr.AudioFile(AUDIO_FILE) as source:
         if (seg.word == 'stupid'):
             print('******', seg.word)
             print('******', seg.start_frame, seg.end_frame)
-            t1 = (seg.start_frame) * 10
-            t2 = (seg.end_frame + 3000) * 10
+            t1 = (seg.start_frame -50) * 10
+            t2 = (seg.end_frame + 300) * 10
 
             stupidAudio = AudioSegment.from_wav(AUDIO_FILE)
             stupidAudio = stupidAudio[t1:t2]
