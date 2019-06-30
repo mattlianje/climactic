@@ -5,11 +5,11 @@ import wave
 import scipy
 import numpy as np
 from scipy.io import wavfile
-import scipy.io
-import pandas
-
 import wave
-obj = wave.open('JRE-CDG.wav','r')
+
+filename = 'JRE-CDG.wav'
+
+obj = wave.open(filename,'r')
 #print( "Number of channels",obj.getnchannels())
 #print ( "Sample width",obj.getsampwidth())
 #print ( "Frame rate.",obj.getframerate())
@@ -17,7 +17,7 @@ obj = wave.open('JRE-CDG.wav','r')
 print ( "parameters:",obj.getparams())
 obj.close()
 
-fs, amp_data = wavfile.read('JRE-CDG.wav')
+fs, amp_data = wavfile.read(filename)
 nf = len(amp_data)
 
 duration = round((nf / fs), 0)
