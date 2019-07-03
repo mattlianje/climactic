@@ -1,0 +1,13 @@
+{
+    "name": "DemoParser",
+    "version": "0.0.1",
+    "description": "Parses DemoFiles",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "demofile": "^1.0.6",
+        "path": "^0.12.7"
+    }
+}

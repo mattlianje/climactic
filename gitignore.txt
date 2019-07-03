@@ -1,1 +1,2 @@
 .idea/
+.demofile-parsing/package-lock.json
