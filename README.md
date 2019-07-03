@@ -10,3 +10,11 @@
 
 ## Smile detection
 - `python smile-detection.py`
+
+## Demofile parsing instructions 
+- Download an test .demo file from https://www.hltv.org/matches
+- Extract dem file from download
+- `cd demofile-parsing`
+- run `npm install`
+- Edit `parse_demo.js` to point to path of downloaded .dem
+- run `node parse_demo.js`
