@@ -92,8 +92,6 @@ class Round {
     var [startB, endB] = timeB;
     return ((startB <= endA) || (endA >= startB));
   }
-
 }
-
 
 module.exports = Round;
