@@ -2,7 +2,7 @@ const fs = require("fs");
 const demofile = require("demofile");
 const path = require("path");
 
-const demPath = "/Users/tylerlam/Downloads/exec-vs-noname-mirage.dem"; //add the filepath here
+const demPath = "C:/Users/eldri/Documents/GitHub/Local_Files/1m1.dem"; //add the filepath here
 const gameStart = 13301; 
 
 fs.readFile(path.resolve(demPath), (err, buffer) => {
