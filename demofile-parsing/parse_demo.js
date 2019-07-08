@@ -3,27 +3,29 @@ const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
 
-fs.readFile(path.resolve("/Users/tylerlam/Downloads/test.dem"), (err, buffer) => {
+fs.readFile(path.resolve("C:/Users/eldri/Documents/GitHub/Local_Files/2m2.dem"), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
   const rounds = [];
   var round_i = false;
+  var roundIndex = 0;
 
   // parse start of the round
   demoFile.gameEvents.on("round_start", e => {
     if(round_i == true){
-      rounds.pop();
+      rounds[roundIndex].startTime = demoFile.currentTime;
+    } else {
+      round_i = true;
+      rounds.push(new Round(demoFile.currentTime));
     }
-    round_i = true;
-    rounds.push(new Round(demoFile.currentTime));
     
     // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
-    // console.log(`round ${roundIndex} started ${demoFile.currentTime}`);
+    console.log(`round ${roundIndex} started ${demoFile.currentTime}`);
   });
 
   // parse end of the round
-  var roundIndex = 0;
   demoFile.gameEvents.on("round_end", e => {
     if(round_i == true){
+      round_i == false;
       var r = rounds[roundIndex];
       r.endTime = demoFile.currentTime;
       r.sortKeyEvents();
@@ -35,8 +37,7 @@ fs.readFile(path.resolve("/Users/tylerlam/Downloads/test.dem"), (err, buffer) =>
       // r.plotHighRates();
 
       // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
-      // console.log(`round ${roundIndex} ended`);
-      round_i == false;
+      console.log(`round ${roundIndex} ended`);
       roundIndex++;
     }
   });
