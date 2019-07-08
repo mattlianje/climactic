@@ -3,31 +3,29 @@ const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
 
-fs.readFile(path.resolve("C:/Users/eldri/Documents/GitHub/Local_Files/2m2.dem"), (err, buffer) => {
+fs.readFile(path.resolve("C:/Users/eldri/Documents/GitHub/Local_Files/exec-vs-noname-mirage(multiple-round-start).dem"), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
   const rounds = [];
-  var round_i = false;
+  var roundEvents = [];
+  var roundLatestStart = 0;
+  var roundOn = false;
   var roundIndex = 0;
 
   // parse start of the round
   demoFile.gameEvents.on("round_start", e => {
-    if(round_i == true){
-      rounds[roundIndex].startTime = demoFile.currentTime;
-    } else {
-      round_i = true;
-      rounds.push(new Round(demoFile.currentTime));
-    }
-    
+    roundOn = true;
+    roundEvents = [];
+    roundLatestStart = demoFile.currentTime;
     // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
     console.log(`round ${roundIndex} started ${demoFile.currentTime}`);
   });
 
   // parse end of the round
   demoFile.gameEvents.on("round_end", e => {
-    if(round_i == true){
-      round_i == false;
+    if(roundOn == true){
+      roundOn == false;
+      rounds.push(new Round(roundLatestStart, demoFile.endTime, roundEvents));
       var r = rounds[roundIndex];
-      r.endTime = demoFile.currentTime;
       r.sortKeyEvents();
       r.calculateEventRates(roundIndex);
       r.getHighRateTimes();
@@ -35,47 +33,50 @@ fs.readFile(path.resolve("C:/Users/eldri/Documents/GitHub/Local_Files/2m2.dem"),
       // r.mapToStreamTimestamps(gameStart);
       // r.plotAllEvents();
       // r.plotHighRates();
-
-      // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
-      console.log(`round ${roundIndex} ended`);
+      roundEvents = [];
+      console.log(`round ${roundIndex} ended ${demoFile.currentTime}`);
       roundIndex++;
     }
+
+    // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
+    // console.log(`round ${roundIndex} ended`);
+    // roundIndex++;
   });
 
   demoFile.gameEvents.on("player_death", e => {
-    if(round_i == true){
+    if(roundOn == true){
       deathEvent = { time: demoFile.currentTime, type: "player_death" };
-      rounds[roundIndex].pushKeyEvent(deathEvent);
-
-      // CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
-      // const victim = demoFile.entities.getByUserId(e.userid);
-      // const victimName = victim ? victim.name : "unnamed";
-
-      // // Attacker may have disconnected so be aware.
-      // // e.g. attacker could have thrown a grenade, disconnected, then that grenade
-      // // killed another player.
-      // const attacker = demoFile.entities.getByUserId(e.attacker);
-      // const attackerName = attacker ? attacker.name : "unnamed";
-
-      // const headshotText = e.headshot ? " HS" : "";
-      // const currentTime = demoFile.currentTime;
-      // console.log(`${attackerName} [${e.weapon}${headshotText}] ${victimName} -> time: ${currentTime}`);
+      roundEvents.push(deathEvent);
     }
+    
+    //CONSOLE LOGGING - ONLY NECESSARY FOR TEST PURPOSES
+    // const victim = demoFile.entities.getByUserId(e.userid);
+    // const victimName = victim ? victim.name : "unnamed";
+
+    // // Attacker may have disconnected so be aware.
+    // // e.g. attacker could have thrown a grenade, disconnected, then that grenade
+    // // killed another player.
+    // const attacker = demoFile.entities.getByUserId(e.attacker);
+    // const attackerName = attacker ? attacker.name : "unnamed";
+
+    // const headshotText = e.headshot ? " HS" : "";
+    // const currentTime = demoFile.currentTime;
+    // console.log(`${attackerName} [${e.weapon}${headshotText}] ${victimName} -> time: ${currentTime}`);
   });
 
   // parse bomb_defuses
   demoFile.gameEvents.on("bomb_defused", e => {
-    if(round_i == true){
+    if(roundOn == true){
       bombDefuseEvent = { time: demoFile.currentTime, type: "bomb_defused" };
-      rounds[roundIndex].pushKeyEvent(bombDefuseEvent);
+      roundEvents.push(bombDefuseEvent);
     }
   });
 
   // parse bomb_planted
   demoFile.gameEvents.on("bomb_planted", e => {
-    if(round_i == true){
+    if(roundOn == true){
       bombPlantEvent = { time: demoFile.currentTime, type: "bomb_planted" };
-      rounds[roundIndex].pushKeyEvent(bombPlantEvent);
+      roundEvents.push(bombPlantEvent);
     }
   });
 
