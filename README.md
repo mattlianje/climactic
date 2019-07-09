@@ -11,7 +11,7 @@
 ### Input an audio file - outputs the amplitude analysis
 - `python amplitude-analysis.py`
 
-## Smile detection
+## Frame detection
 - `$cd frame-detection`
 - `python smile-detection.py`
 
