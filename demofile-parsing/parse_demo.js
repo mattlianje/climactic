@@ -2,8 +2,9 @@ const fs = require("fs");
 const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
+const demPath = "C:/Users/eldri/Documents/GitHub/Local_Files/exec-vs-noname-mirage(multiple-round-start).dem"; //add the filepath here
 
-fs.readFile(path.resolve("C:/Users/eldri/Documents/GitHub/Local_Files/exec-vs-noname-mirage(multiple-round-start).dem"), (err, buffer) => {
+fs.readFile(path.resolve(demPath), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
   const rounds = [];
   var roundEvents = [];
