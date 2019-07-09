@@ -34,7 +34,7 @@ class Round {
     return 0;
   }
 
-  calculateEventRates() {
+  calculateEventRates(roundIndex) {
     var i;
     for (i = 0; i+1 < this.keyEvents.length; i++) {
       var deltaTime = this.keyEvents[i+1].time - this.keyEvents[i].time;
@@ -42,7 +42,7 @@ class Round {
       var rate = 1/deltaTime;
       this.eventRates.push(rate);
     }
-    console.log("====");
+    console.log(`==== Round ${roundIndex}`);
   }
 
   getHighRateTimes() {
@@ -63,6 +63,7 @@ class Round {
         this.highRateTimes.push([start, end]);
       }
     }
+    console.log("High-Rate Times (Before Merge):");
     console.log(this.highRateTimes); 
   }
 
@@ -84,6 +85,7 @@ class Round {
       }
     }
     this.highlights = tmp;
+    console.log("Final Round Highlights:");
     console.log(this.highlights);
   }
 
