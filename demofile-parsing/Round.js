@@ -94,6 +94,38 @@ class Round {
     var [startB, endB] = timeB;
     return ((startB <= endA) || (endA >= startB));
   }
+
+  getKills() {
+
+    // Keeping a ledger of the name of the killer for each kill in the round.
+    var roundKillerNames = [];
+    for (var i = 0; i < this.keyEvents.length; i++) {
+
+      // If the event is a player death add the killer to the array.
+      if (this.keyEvents[i].type == 'player_death') {
+        console.log(this.keyEvents[i]);
+        roundKillerNames.push(this.keyEvents[i].attacker_name);
+      }
+    }
+    this.countKills(roundKillerNames);
+  }
+
+  countKills(inputArray) {
+    
+    // counts object for the round with <key String, Value Int> = <playerName, numberOfKillsInCurrentRound>.
+    var counts = {};
+    inputArray.forEach(function(x) { counts[x] = (counts[x] || 0)+1; });
+    console.log(counts);
+
+    Object.keys(counts).forEach(function(key){
+      if((counts[key]) == 4) {
+        console.log(key + ' got 4 kills');  
+      }  
+      if((counts[key]) == 5) {
+        console.log(key + ' got 5 kills');  
+      }  
+    });
+  }
 }
 
 module.exports = Round;

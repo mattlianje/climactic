@@ -2,7 +2,7 @@ const fs = require("fs");
 const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
-const demPath = "C:/Users/eldri/Documents/GitHub/Local_Files/exec-vs-noname-mirage(multiple-round-start).dem"; //add the filepath here
+const demPath = "vitality-vs-nip-dust2.dem"; //add the filepath here
 
 fs.readFile(path.resolve(demPath), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
@@ -31,6 +31,7 @@ fs.readFile(path.resolve(demPath), (err, buffer) => {
       r.calculateEventRates(roundIndex);
       r.getHighRateTimes();
       r.mergeTimeRanges();
+      r.getKills();
       // r.mapToStreamTimestamps(gameStart);
       // r.plotAllEvents();
       // r.plotHighRates();
@@ -46,7 +47,12 @@ fs.readFile(path.resolve(demPath), (err, buffer) => {
 
   demoFile.gameEvents.on("player_death", e => {
     if(roundOn == true){
-      deathEvent = { time: demoFile.currentTime, type: "player_death" };
+      // TODO add who did the killing and how it was done to the death event
+
+      const attacker = demoFile.entities.getByUserId(e.attacker);
+      const attackerName = attacker ? attacker.name : "unnamed";
+
+      deathEvent = { time: demoFile.currentTime, type: "player_death", attacker_name: attackerName };
       roundEvents.push(deathEvent);
     }
     
