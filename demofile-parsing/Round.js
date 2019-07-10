@@ -103,7 +103,6 @@ class Round {
 
       // If the event is a player death add the killer to the array.
       if (this.keyEvents[i].type == 'player_death') {
-        console.log(this.keyEvents[i]);
         roundKillerNames.push(this.keyEvents[i].attacker_name);
       }
     }
@@ -111,11 +110,10 @@ class Round {
   }
 
   countKills(inputArray) {
-    
+
     // counts object for the round with <key String, Value Int> = <playerName, numberOfKillsInCurrentRound>.
     var counts = {};
     inputArray.forEach(function(x) { counts[x] = (counts[x] || 0)+1; });
-    console.log(counts);
 
     Object.keys(counts).forEach(function(key){
       if((counts[key]) == 4) {
