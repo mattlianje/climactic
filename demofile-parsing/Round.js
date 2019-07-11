@@ -109,6 +109,9 @@ class Round {
     }
     this.countKills(roundKillerNames);
 
+    //TODO (Figure out why the below chunk is causing async nightmares).
+    // To test the below comment out the above part of getKills() and uncomment the below.
+
     // for (var i = 0; i < this.keyEvents.length; i++) {
 
     //   // If the event is a player death add the killer to the array.
