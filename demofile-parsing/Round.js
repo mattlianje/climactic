@@ -35,14 +35,13 @@ class Round {
     return 0;
   }
 
-  calculateEventRates(roundIndex) {
+  calculateEventRates() {
     var i;
     for (i = 0; i+1 < this.keyEvents.length; i++) {
       var deltaTime = this.keyEvents[i+1].time - this.keyEvents[i].time;
       var rate = deltaTime > 0 ? 1/deltaTime : 0;
       this.eventRates.push(rate);
     }
-    console.log(`==== Round ${roundIndex}`);
   }
 
   getHighRateTimes() {
@@ -56,7 +55,7 @@ class Round {
 
     for(var j = 0; j < this.eventRates.length; j++) {
       if (this.eventRates[j] > avg/3) {
-        var start = this.keyEvents[j].time - 5;
+        var start = this.keyEvents[j].time - 2;
         var end = this.keyEvents[j+1].time + 2;
         this.highRateTimes.push([start, end]);
       }
@@ -83,10 +82,10 @@ class Round {
     this.highlights = tmp;
   }
 
-  mapToStreamTimestamps() {
+  mapToStreamTimestamps(demoGameStart, streamGameStart) {
     for (var i = 0; i < this.highlights.length; i++) {
-      var s = this.highlights[i][0];
-      var e = this.highlights[i][1];
+      var s = this.highlights[i][0] - demoGameStart + streamGameStart;
+      var e = this.highlights[i][1] - demoGameStart + streamGameStart;
       this.highlights[i][0] = this.secondsToTimestamp(s);
       this.highlights[i][1] = this.secondsToTimestamp(e);
     }
