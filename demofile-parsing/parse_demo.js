@@ -3,7 +3,7 @@ const demofile = require("demofile");
 const path = require("path");
 const Round = require('./Round.js');
 
-const DEBUG = false;
+const DEBUG = false; // If you want to log stuff set this to true :))) 
 const demPath = "/Users/tylerlam/Desktop/demfiles/ence-vs-astralis-m2-inferno.dem";
 const streamGameStart = 595; // specific to the stream chosen. Must set this before running
 var demoGameStart = null;
@@ -23,7 +23,7 @@ function secondsToTimestamp(seconds, demoStart, streamStart) {
 }
 
 
-fs.readFile(path.resolve(b), (err, buffer) => {
+fs.readFile(path.resolve(demPath), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
   const rounds = [];
   var roundEvents = [];
@@ -59,7 +59,7 @@ fs.readFile(path.resolve(b), (err, buffer) => {
       round.calculateEventRates();
       round.getHighRateTimes();
       round.mergeTimeRanges();
-      round.mapToStreamTimestamps(demoGameStart, streamGameStart);
+      console.log(round.getStreamTimestamps(demoGameStart, streamGameStart));
       // reset roundEvents 
       roundEvents = [];
       // log round end

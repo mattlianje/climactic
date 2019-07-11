@@ -36,8 +36,7 @@ class Round {
   }
 
   calculateEventRates() {
-    var i;
-    for (i = 0; i+1 < this.keyEvents.length; i++) {
+    for (var i = 0; i+1 < this.keyEvents.length; i++) {
       var deltaTime = this.keyEvents[i+1].time - this.keyEvents[i].time;
       var rate = deltaTime > 0 ? 1/deltaTime : 0;
       this.eventRates.push(rate);
@@ -82,14 +81,14 @@ class Round {
     this.highlights = tmp;
   }
 
-  mapToStreamTimestamps(demoGameStart, streamGameStart) {
+  getStreamTimestamps(demoGameStart, streamGameStart) {
+    var result = [];
     for (var i = 0; i < this.highlights.length; i++) {
       var s = this.highlights[i][0] - demoGameStart + streamGameStart;
       var e = this.highlights[i][1] - demoGameStart + streamGameStart;
-      this.highlights[i][0] = this.secondsToTimestamp(s);
-      this.highlights[i][1] = this.secondsToTimestamp(e);
+      result.push([this.secondsToTimestamp(s), this.secondsToTimestamp(e)]);
     }
-    console.log(this.highlights);
+    return result;
   }
 
   secondsToTimestamp(seconds) {
