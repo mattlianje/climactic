@@ -2,7 +2,7 @@ const fs = require("fs");
 const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
-const demPath = "vitality-vs-nip-dust2.dem"; //add the filepath here
+const demPath = "C:/Users/matth/Downloads/ESL-One-Cologne-2019-vitality-vs-nip-dust2/vitality-vs-nip-dust2.dem"; //add the filepath here
 
 fs.readFile(path.resolve(demPath), (err, buffer) => {
   const demoFile = new demofile.DemoFile();
@@ -31,7 +31,7 @@ fs.readFile(path.resolve(demPath), (err, buffer) => {
       r.calculateEventRates(roundIndex);
       r.getHighRateTimes();
       r.mergeTimeRanges();
-      r.getKills();
+      // r.getKills();
       // r.mapToStreamTimestamps(gameStart);
       // r.plotAllEvents();
       // r.plotHighRates();
