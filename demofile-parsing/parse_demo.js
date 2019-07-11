@@ -29,9 +29,10 @@ fs.readFile(path.resolve(demPath), (err, buffer) => {
       var r = rounds[roundIndex];
       r.sortKeyEvents();
       r.calculateEventRates(roundIndex);
+      
       r.getHighRateTimes();
       r.mergeTimeRanges();
-      // r.getKills();
+      r.getKills();
       // r.mapToStreamTimestamps(gameStart);
       // r.plotAllEvents();
       // r.plotHighRates();
