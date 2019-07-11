@@ -82,17 +82,10 @@ class Round {
     this.highlights = tmp;
   }
 
-<<<<<<< HEAD
   mapToStreamTimestamps(demoGameStart, streamGameStart) {
     for (var i = 0; i < this.highlights.length; i++) {
       var s = this.highlights[i][0] - demoGameStart + streamGameStart;
       var e = this.highlights[i][1] - demoGameStart + streamGameStart;
-=======
-  mapToStreamTimestamps() {
-    for (var i = 0; i < this.highlights.length; i++) {
-      var s = this.highlights[i][0];
-      var e = this.highlights[i][1];
->>>>>>> b28c1ccb03bcb601576b049ae13881082103e2a5
       this.highlights[i][0] = this.secondsToTimestamp(s);
       this.highlights[i][1] = this.secondsToTimestamp(e);
     }
@@ -165,17 +158,6 @@ class Round {
     }
     console.log(asciichart.plot(g));
   }
-
-  logKillTimes(gameStart) {
-    var kills = [];
-    console.log(this.keyEvents);
-    for (var i = 0; i < this.keyEvents.length; i++) {
-      var time = this.keyEvents[i].time + gameStart;
-      kills.push(time);
-    }
-    console.log(kills);
-  }
-
 }
 
 module.exports = Round;
