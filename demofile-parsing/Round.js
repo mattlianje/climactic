@@ -9,6 +9,7 @@ class Round {
     this.eventRates = [];
     this.highRateTimes = [];
     this.highlights = [];
+    this.playerKills = {};
   }
 
   // check if a time is within the round
@@ -58,6 +59,7 @@ class Round {
     // const highlightLength = 10;
     for(var j = 0; j < this.eventRates.length; j++) {
       if (this.eventRates[j] > avg) {
+        console.log(this.keyEvents[j]);
         var start = this.keyEvents[j].time - 2;
         var end = this.keyEvents[j+1].time + 2;
         this.highRateTimes.push([start, end]);
@@ -97,16 +99,37 @@ class Round {
 
   getKills() {
 
-    // Keeping a ledger of the name of the killer for each kill in the round.
-    var roundKillerNames = [];
+    // // Keeping a ledger of the name of the killer for each kill in the round.
+    // var roundKillerNames = [];
+    // for (var i = 0; i < this.keyEvents.length; i++) {
+
+    //   // If the event is a player death add the killer to the array.
+    //   if (this.keyEvents[i].type == 'player_death') {
+    //     roundKillerNames.push(this.keyEvents[i].attacker_name);
+    //   }
+    // }
+    // this.countKills(roundKillerNames);
+
     for (var i = 0; i < this.keyEvents.length; i++) {
 
       // If the event is a player death add the killer to the array.
       if (this.keyEvents[i].type == 'player_death') {
-        roundKillerNames.push(this.keyEvents[i].attacker_name);
+        killerName = this.keyEvents[i].attacker_name;
+
+        // If the attacker name is in the array increment the kill count +1 an overwrite.
+        if (killerName in this.playerKills) {
+          newPlayerKills = this.playerKills[killerName] + 1;
+          this.playerKills.push({playerName:killerName, killCount:newPlayerKills});
+        }
+        else if (!(killerName in this.playerKills)) {
+          this.playerKills.push({playerName:killerName, killCount: 1});
+        }
       }
     }
-    this.countKills(roundKillerNames);
+    console.log(this.playerKills);
+    const key = Object.keys(this.playerKills).find(key => this.playerKills[key] === 4);
+    console.log(key);
+
   }
 
   countKills(inputArray) {
