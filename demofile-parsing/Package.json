@@ -9,6 +9,7 @@
     "dependencies": {
         "asciichart": "^1.5.9",
         "demofile": "^1.0.6",
-        "path": "^0.12.7"
+        "path": "^0.12.7",
+        "inquirer": "^6.5.0"
     }
 }
