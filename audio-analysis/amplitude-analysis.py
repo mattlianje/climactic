@@ -6,8 +6,9 @@ import scipy
 import numpy as np
 from scipy.io import wavfile
 import wave
+import matplotlib.pyplot as plt
 
-filename = 'JRE-CDG.wav'
+filename = 'test.wav'
 
 obj = wave.open(filename,'r')
 #print( "Number of channels",obj.getnchannels())
@@ -44,6 +45,8 @@ amp_sum = 0
 max_amp = 0
 min_amp = 0
 
+xArray = []
+yArray = []
 for c in range(len(amp_data)):
     amp_sum += amp_data[c][0]
     if fc == (interval*fs) or c == len(amp_data): #If you have gone through an interval
@@ -66,6 +69,10 @@ for c in range(len(amp_data)):
 
 for x, y in interval_amplitudes.items():
   print(x, y)
+  xArray.append(x[1])
+  yArray.append(y)
 
 print('Max Amplitude: ', max_amp)
 print('Min Amplitude: ', min_amp)
+plt.plot(xArray, yArray)
+plt.show()

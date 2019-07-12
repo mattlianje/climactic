@@ -8,6 +8,8 @@ import youtube_dl
 import pyaudio
 import speech_recognition as sr
 import pocketsphinx
+import matplotlib.pyplot as plt
+from textblob import TextBlob
 
 ydl_opts = {
     'format': 'bestaudio/best',
@@ -35,6 +37,9 @@ AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), "test.wav")
 # Uses AUDIO-FILE to do a speech to text.
 r = sr.Recognizer()
 framerate = 0.1
+words = []
+subjectivityScores = []
+
 with sr.AudioFile(AUDIO_FILE) as source:
     audio = r.record(source)  # read the entire audio file
     decoder = r.recognize_sphinx(audio, show_all=True)
@@ -43,7 +48,8 @@ with sr.AudioFile(AUDIO_FILE) as source:
     # Prints out all the words and their start and end timestamps.
     for seg in decoder.seg():
         print(seg.word, seg.start_frame, seg.end_frame)
-
+        words.append(seg.word)
+        subjectivityScores.append(TextBlob(seg.word).sentiment.polarity)
         # Run a test where the word stupid gets saved as a new audio file.
         if (seg.word == 'stupid'):
             print('******', seg.word)
@@ -54,3 +60,6 @@ with sr.AudioFile(AUDIO_FILE) as source:
             stupidAudio = AudioSegment.from_wav(AUDIO_FILE)
             stupidAudio = stupidAudio[t1:t2]
             stupidAudio.export('newStupid.wav', format='wav') # exports a wav to the current path
+
+plt.bar(words, subjectivityScores)
+plt.show()
