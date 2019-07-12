@@ -1,4 +1,5 @@
 const demofile = require("demofile");
+const asciichart = require('asciichart');
 
 class Round {
 
@@ -35,15 +36,12 @@ class Round {
     return 0;
   }
 
-  calculateEventRates(roundIndex) {
-    var i;
-    for (i = 0; i+1 < this.keyEvents.length; i++) {
+  calculateEventRates() {
+    for (var i = 0; i+1 < this.keyEvents.length; i++) {
       var deltaTime = this.keyEvents[i+1].time - this.keyEvents[i].time;
-      if (deltaTime == 0) { continue; }
-      var rate = 1/deltaTime;
+      var rate = deltaTime > 0 ? 1/deltaTime : 0;
       this.eventRates.push(rate);
     }
-    console.log(`==== Round ${roundIndex}`);
   }
 
   getHighRateTimes() {
@@ -55,18 +53,13 @@ class Round {
     }
     var avg = total / this.eventRates.length;
 
-    var times = [];
-    // const highlightLength = 10;
     for(var j = 0; j < this.eventRates.length; j++) {
-      if (this.eventRates[j] > avg) {
-        console.log(this.keyEvents[j]);
+      if (this.eventRates[j] > avg/3) {
         var start = this.keyEvents[j].time - 2;
         var end = this.keyEvents[j+1].time + 2;
         this.highRateTimes.push([start, end]);
       }
     }
-    console.log("High-Rate Times (Before Merge):");
-    console.log(this.highRateTimes); 
   }
 
   mergeTimeRanges() {
@@ -87,8 +80,31 @@ class Round {
       }
     }
     this.highlights = tmp;
-    console.log("Final Round Highlights:");
-    console.log(this.highlights);
+  }
+
+  getStreamTimestamps(demoGameStart, streamGameStart) {
+    var result = [];
+    for (var i = 0; i < this.highlights.length; i++) {
+      var s = this.highlights[i][0] - demoGameStart + streamGameStart;
+      var e = this.highlights[i][1] - demoGameStart + streamGameStart;
+      result.push([this.secondsToTimestamp(s), this.secondsToTimestamp(e)]);
+    }
+    return result;
+  }
+
+  secondsToTimestamp(seconds) {
+    var hours = Math.floor(seconds/3600);
+    seconds = seconds%3600;
+    var mins = Math.floor(seconds/60);
+    seconds = Math.floor(seconds%60);
+    return(this.formatTimestamp(hours,mins,seconds));
+  }
+
+  formatTimestamp(hours, mins, seconds) {
+    hours = hours < 10 ? `0${hours}` : hours;
+    mins = mins < 10 ? `0${mins}` : mins;
+    seconds = seconds < 10 ? `0${seconds}` : seconds;
+    return `${hours}h${mins}m${seconds}s`;
   }
 
   timesOverlap(timeA, timeB) {
@@ -109,7 +125,7 @@ class Round {
     }
     this.countKills(roundKillerNames);
 
-    //TODO (Figure out why the below chunk is causing async nightmares).
+    // TODO (Figure out why the below chunk is causing async nightmares).
     // To test the below comment out the above part of getKills() and uncomment the below.
 
     // for (var i = 0; i < this.keyEvents.length; i++) {
@@ -118,6 +134,7 @@ class Round {
     //   if (this.keyEvents[i].type == 'player_death') {
     //     killerName = this.keyEvents[i].attacker_name;
 
+    //     console.log(this.playerKills);
     //     // If the attacker name is in the array increment the kill count +1 an overwrite.
     //     if (killerName in this.playerKills) {
     //       newPlayerKills = this.playerKills[killerName] + 1;
@@ -148,6 +165,51 @@ class Round {
         console.log(key + ' got 5 kills');  
       }  
     });
+  }
+  // for debugging only
+  plotAllEvents() {
+    var g = [];
+    var j = 0;
+    var eventCount = 0;
+    for (var i = Math.floor(this.startTime); i < Math.floor(this.endTime); i++) {
+      if (i == Math.floor(this.keyEvents[j].time)) {
+        eventCount++;
+        j = j < this.keyEvents.length - 1? j + 1 : j;
+      }
+      g.push(eventCount);
+    }
+    console.log(asciichart.plot(g));
+  }
+
+  plotHighRates() {
+    var g = [];
+    var j = 0;
+    var rate = 0;
+    for (var i = Math.floor(this.startTime); i < Math.floor(this.endTime); i++) {
+      if (i == Math.floor(this.keyEvents[j].time)) {
+        rate = this.eventRates[j] * 10;
+        j = j < this.eventRates.length - 1? j + 1 : j;
+      } else {
+        rate = 0;
+      }
+      g.push(rate);
+    }
+    console.log(asciichart.plot(g));
+  }
+
+  plotHighlightTimes() {
+    var g = [];
+    var j = 0;
+    var val = -1;
+    var highlightTimes = [].concat.apply([], this.highlights);
+    for (var i = Math.floor(this.startTime); i < Math.floor(this.endTime); i++) {
+      if (i == Math.floor(highlightTimes[j])) {
+        val *= -1;
+        j = j < this.eventRates.length - 1? j + 1 : j;
+      }
+      g.push(val);
+    }
+    console.log(asciichart.plot(g));
   }
 }
 
