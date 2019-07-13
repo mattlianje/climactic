@@ -128,11 +128,11 @@ class Round {
     // TODO (Figure out why the below chunk is causing async nightmares).
     // To test the below comment out the above part of getKills() and uncomment the below.
 
-    // for (var i = 0; i < this.keyEvents.length; i++) {
+    // for (var k = 0; k < this.keyEvents.length; k++) {
 
     //   // If the event is a player death add the killer to the array.
-    //   if (this.keyEvents[i].type == 'player_death') {
-    //     killerName = this.keyEvents[i].attacker_name;
+    //   if (this.keyEvents[k].type == 'player_death') {
+    //     killerName = this.keyEvents[k].attacker_name;
 
     //     console.log(this.playerKills);
     //     // If the attacker name is in the array increment the kill count +1 an overwrite.
@@ -140,7 +140,7 @@ class Round {
     //       newPlayerKills = this.playerKills[killerName] + 1;
     //       this.playerKills.push({playerName:killerName, killCount:newPlayerKills});
     //     }
-    //     else if (!(killerName in this.playerKills)) {
+    //     if (!(killerName in this.playerKills)) {
     //       this.playerKills.push({playerName:killerName, killCount: 1});
     //     }
     //   }
