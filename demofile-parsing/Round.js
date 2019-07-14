@@ -115,37 +115,35 @@ class Round {
 
   getKills() {
     // Keeping a ledger of the name of the killer for each kill in the round.
-    var roundKillerNames = [];
-    for (var i = 0; i < this.keyEvents.length; i++) {
+    // var roundKillerNames = [];
+    // for (var i = 0; i < this.keyEvents.length; i++) {
 
-      // If the event is a player death add the killer to the array.
-      if (this.keyEvents[i].type == 'player_death') {
-        roundKillerNames.push(this.keyEvents[i].attacker_name);
-      }
-    }
-    this.countKills(roundKillerNames);
+    //   // If the event is a player death add the killer to the array.
+    //   if (this.keyEvents[i].type == 'player_death') {
+    //     roundKillerNames.push(this.keyEvents[i].attacker_name);
+    //   }
+    // }
+    // this.countKills(roundKillerNames);
 
     // TODO (Figure out why the below chunk is causing async nightmares).
     // To test the below comment out the above part of getKills() and uncomment the below.
 
-    // for (var k = 0; k < this.keyEvents.length; k++) {
+    for (var k = 0; k < this.keyEvents.length; k++) {
 
     //   // If the event is a player death add the killer to the array.
-    //   if (this.keyEvents[k].type == 'player_death') {
-    //     killerName = this.keyEvents[k].attacker_name;
+      if (this.keyEvents[k].type == 'player_death') {
+        var killerName = this.keyEvents[k].attacker_name;
 
-    //     console.log(this.playerKills);
-    //     // If the attacker name is in the array increment the kill count +1 an overwrite.
-    //     if (killerName in this.playerKills) {
-    //       newPlayerKills = this.playerKills[killerName] + 1;
-    //       this.playerKills.push({playerName:killerName, killCount:newPlayerKills});
-    //     }
-    //     if (!(killerName in this.playerKills)) {
-    //       this.playerKills.push({playerName:killerName, killCount: 1});
-    //     }
-    //   }
-    // }
-    // console.log(this.playerKills);
+        // If the attacker name is in the array increment the kill count +1 an overwrite.
+        if (killerName in this.playerKills) {
+          var newPlayerKills = this.playerKills[killerName] + 1;
+          this.playerKills[killerName] = newPlayerKills;
+        } else {
+          this.playerKills[killerName] = 1;
+        }
+      }
+    }
+    console.log(this.playerKills);
     // const key = Object.keys(this.playerKills).find(key => this.playerKills[key] === 4);
     // console.log(key);
 
