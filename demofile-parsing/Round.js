@@ -139,16 +139,13 @@ class Round {
               this.highlights = [firstKillTime, finalKillTime];
             }
           }
-
           if (newPlayerKills == 5) {
-
             var firstKillTime = this.firstKills[killerName];
             var finalKillTime = this.keyEvents[i].time;
-
             console.log('**ALERT** ' + killerName + ' got 5 kills.');
             this.highlights = [firstKillTime, finalKillTime];
           }
-
+        // Else ... if the player has not racked up a kill in the round yet.
         } else {
           // Get the timestamp of the first kill.
           var firstKillTime = this.keyEvents[i].time;
