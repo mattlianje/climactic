@@ -20,8 +20,6 @@ function secondsToTimestamp(seconds, demoStart, streamStart) {
   return `${hours}h${mins}m${seconds}s`;
 }
 
-// parseDemo('trete', 'C:\Users\matth\Downloads\ESL-One-Cologne-2019-vitality-vs-nip-dust2\vitality-vs-nip-dust2', 45);
-
 var parseDemo = function(url, demPath, streamGameStart){
   fs.readFile(path.resolve(demPath), (err, buffer) => {
     const demoFile = new demofile.DemoFile();
