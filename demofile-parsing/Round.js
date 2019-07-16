@@ -136,14 +136,18 @@ class Round {
 
             if ((this.keyEvents[i].time - firstKillTime) <= maxTimeFirst2Last) {
               console.log('**ALERT** ' + killerName + ' got 4 kills within ' + maxTimeFirst2Last + ' seconds.');
-              this.highlights = [firstKillTime, finalKillTime];
+              this.highlights = [];
+              var tmp = [firstKillTime, finalKillTime];
+              this.highlights = tmp;
             }
           }
           if (newPlayerKills == 5) {
             var firstKillTime = this.firstKills[killerName];
             var finalKillTime = this.keyEvents[i].time;
             console.log('**ALERT** ' + killerName + ' got 5 kills.');
-            this.highlights = [firstKillTime, finalKillTime];
+            this.highlights = [];
+            var tmp = [firstKillTime, finalKillTime];
+            this.highlights = tmp;
           }
         // Else ... if the player has not racked up a kill in the round yet.
         } else {
