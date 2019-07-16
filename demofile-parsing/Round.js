@@ -10,6 +10,8 @@ class Round {
     this.eventRates = [];
     this.highRateTimes = [];
     this.highlights = [];
+    this.playerKills = {};
+    this.firstKills = {};
   }
 
   // check if a time is within the round
@@ -110,6 +112,53 @@ class Round {
     var [startA, endA] = timeA;
     var [startB, endB] = timeB;
     return ((startB <= endA) || (endA >= startB));
+  }
+
+  getKills() {
+    // Hardcode the max delta between 1st and 4th kills in a 4k for it to count as a highlight.
+    var maxTimeFirst2Last = 30;
+
+    for (var i = 0; i < this.keyEvents.length; i++) {
+
+    //   // If the event is a player death add the killer to the array.
+      if (this.keyEvents[i].type == 'player_death') {
+        var killerName = this.keyEvents[i].attacker_name;
+
+        // If the attacker name is in the array increment the kill count +1 an overwrite.
+        if (killerName in this.playerKills) {
+          var newPlayerKills = this.playerKills[killerName] + 1;
+          this.playerKills[killerName] = newPlayerKills;
+
+          if (newPlayerKills == 4) {
+            // Delta of 4th kill time and first kill time.
+            var firstKillTime = this.firstKills[killerName];
+            var finalKillTime = this.keyEvents[i].time;
+
+            if ((this.keyEvents[i].time - firstKillTime) <= maxTimeFirst2Last) {
+              console.log('**ALERT** ' + killerName + ' got 4 kills within ' + maxTimeFirst2Last + ' seconds.');
+              this.highlights = [];
+              var tmp = [[firstKillTime, finalKillTime]];
+              this.highlights = tmp;
+            }
+          }
+          if (newPlayerKills == 5) {
+            var firstKillTime = this.firstKills[killerName];
+            var finalKillTime = this.keyEvents[i].time;
+            console.log('**ALERT** ' + killerName + ' got 5 kills.');
+            this.highlights = [];
+            var tmp = [[firstKillTime, finalKillTime]];
+            this.highlights = tmp;
+          }
+        // Else ... if the player has not racked up a kill in the round yet.
+        } else {
+          // Get the timestamp of the first kill.
+          var firstKillTime = this.keyEvents[i].time;
+          // Add the first kill time to the 'dictionnary' of playerNames and first kill times for that round.
+          this.firstKills[killerName] = firstKillTime;
+          this.playerKills[killerName] = 1;
+        }
+      }
+    }
   }
 
   // for debugging only

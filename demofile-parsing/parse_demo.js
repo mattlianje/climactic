@@ -20,7 +20,6 @@ function secondsToTimestamp(seconds, demoStart, streamStart) {
   return `${hours}h${mins}m${seconds}s`;
 }
 
-
 var parseDemo = function(url, demPath, streamGameStart){
   fs.readFile(path.resolve(demPath), (err, buffer) => {
     const demoFile = new demofile.DemoFile();
@@ -58,6 +57,7 @@ var parseDemo = function(url, demPath, streamGameStart){
         round.calculateEventRates();
         round.getHighRateTimes();
         round.mergeTimeRanges();
+        round.getKills();
         console.log(round.getStreamTimestamps(demoGameStart, streamGameStart));
         // reset roundEvents 
         roundEvents = [];
@@ -67,6 +67,7 @@ var parseDemo = function(url, demPath, streamGameStart){
           round.plotAllEvents();
           round.plotHighRates();
           round.plotHighlightTimes();
+          round.getKills();
           console.log(`set demoGameStart to: ${demoGameStart}`);
         }
         roundIndex++;
@@ -75,8 +76,11 @@ var parseDemo = function(url, demPath, streamGameStart){
   
     demoFile.gameEvents.on("player_death", e => {
       var t = demoFile.currentTime - 20;
+      const attacker = demoFile.entities.getByUserId(e.attacker);
+      const attackerName = attacker ? attacker.name : "unnamed";
+
       if(roundOn == true){
-        deathEvent = { time: t, type: "player_death" };
+        deathEvent = { time: t, type: "player_death", attacker_name: attackerName};
         roundEvents.push(deathEvent);
       }
       
