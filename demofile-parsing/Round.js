@@ -11,6 +11,7 @@ class Round {
     this.highRateTimes = [];
     this.highlights = [];
     this.playerKills = {};
+    this.firstKills = {};
   }
 
   // check if a time is within the round
@@ -114,56 +115,44 @@ class Round {
   }
 
   getKills() {
-    // Keeping a ledger of the name of the killer for each kill in the round.
-    // var roundKillerNames = [];
-    // for (var i = 0; i < this.keyEvents.length; i++) {
+    // Hardcode the max delta between 1st and 4th kills in a 4k for it to count as a highlight.
+    var maxTimeFirst2Last = 30;
+
+    for (var i = 0; i < this.keyEvents.length; i++) {
 
     //   // If the event is a player death add the killer to the array.
-    //   if (this.keyEvents[i].type == 'player_death') {
-    //     roundKillerNames.push(this.keyEvents[i].attacker_name);
-    //   }
-    // }
-    // this.countKills(roundKillerNames);
-
-    // TODO (Figure out why the below chunk is causing async nightmares).
-    // To test the below comment out the above part of getKills() and uncomment the below.
-
-    for (var k = 0; k < this.keyEvents.length; k++) {
-
-    //   // If the event is a player death add the killer to the array.
-      if (this.keyEvents[k].type == 'player_death') {
-        var killerName = this.keyEvents[k].attacker_name;
+      if (this.keyEvents[i].type == 'player_death') {
+        var killerName = this.keyEvents[i].attacker_name;
 
         // If the attacker name is in the array increment the kill count +1 an overwrite.
         if (killerName in this.playerKills) {
           var newPlayerKills = this.playerKills[killerName] + 1;
           this.playerKills[killerName] = newPlayerKills;
+
+          if (newPlayerKills == 4) {
+            // Delta of 4th kill time and first kill time.
+            var firstKillTime = this.firstKills[killerName];
+
+            if ((this.keyEvents[i].time - firstKillTime) <= maxTimeFirst2Last) {
+              console.log('**ALERT** ' + killerName + ' got 4 kills within ' + maxTimeFirst2Last + ' seconds.');
+            }
+          }
+
+          if (newPlayerKills == 5) {
+            console.log('**ALERT** ' + killerName + ' got 5 kills.');
+          }
+
         } else {
+          // Get the timestamp of the first kill.
+          var firstKillTime = this.keyEvents[i].time;
+          // Add the first kill time to the 'dictionnary' of playerNames and first kill times for that round.
+          this.firstKills[killerName] = firstKillTime;
           this.playerKills[killerName] = 1;
         }
       }
     }
-    console.log(this.playerKills);
-    // const key = Object.keys(this.playerKills).find(key => this.playerKills[key] === 4);
-    // console.log(key);
-
   }
 
-  countKills(inputArray) {
-
-    // counts object for the round with <key String, Value Int> = <playerName, numberOfKillsInCurrentRound>.
-    var counts = {};
-    inputArray.forEach(function(x) { counts[x] = (counts[x] || 0)+1; });
-
-    Object.keys(counts).forEach(function(key){
-      if((counts[key]) == 4) {
-        console.log(key + ' got 4 kills');  
-      }  
-      if((counts[key]) == 5) {
-        console.log(key + ' got 5 kills');  
-      }  
-    });
-  }
   // for debugging only
   plotAllEvents() {
     var g = [];
