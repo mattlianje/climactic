@@ -86,7 +86,7 @@ var parseDemo = function(url, demPath, streamGameStart){
           round.plotAllEvents();
           round.plotHighRates();
           round.plotHighlightTimes();
-          round.getKills();
+          // round.getKills();
           console.log(`set demoGameStart to: ${demoGameStart}`);
         }
         roundIndex++;
