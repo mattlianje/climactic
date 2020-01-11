@@ -173,7 +173,7 @@ class Round {
       }
       g.push(eventCount);
     }
-    console.log(asciichart.plot(g));
+    return(asciichart.plot(g));
   }
 
   plotHighRates() {
@@ -189,7 +189,7 @@ class Round {
       }
       g.push(rate);
     }
-    console.log(asciichart.plot(g));
+    return(asciichart.plot(g));
   }
 
   plotHighlightTimes() {
@@ -204,7 +204,7 @@ class Round {
       }
       g.push(val);
     }
-    console.log(asciichart.plot(g));
+    return(asciichart.plot(g));
   }
 }
 
