@@ -2,9 +2,9 @@
     "name": "DemoParser",
     "version": "0.0.1",
     "description": "Parses DemoFiles",
-    "main": "server.js",
+    "main": "index.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "node index.js"
     },
     "dependencies": {
         "asciichart": "^1.5.9",
