@@ -6,6 +6,7 @@ import scipy
 import numpy as np
 from scipy.io import wavfile
 import wave
+import matplotlib.pylab as plt
 
 filename = 'JRE-CDG.wav'
 
@@ -38,6 +39,10 @@ else:
 
 #Variables for Amplitude parsing
 interval_amplitudes= {}
+
+# Test dictionary for graphing amplitudes
+raw_amplitudes = {}
+
 fc = 1
 ic = 1
 amp_sum = 0
@@ -51,6 +56,8 @@ for c in range(len(amp_data)):
         #Calculate average amplitude in interval
         interval_avg = amp_sum/fc
         interval_amplitudes['Interval', ic] = interval_avg
+
+        raw_amplitudes[ic] = interval_avg
 
         #Find Max and Min Amplitudes for reference
         if interval_avg >= max_amp:
@@ -69,3 +76,7 @@ for x, y in interval_amplitudes.items():
 
 print('Max Amplitude: ', max_amp)
 print('Min Amplitude: ', min_amp)
+
+# We must sort the dictionary to be able to iterate through it.
+plt.plot(*zip(*sorted(raw_amplitudes.items())))
+plt.show()
