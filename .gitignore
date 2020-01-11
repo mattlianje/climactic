@@ -1,3 +1,4 @@
 .idea/
 demofile-parsing/package-lock.json
 demofile-parsing/node_modules/
+output.html
