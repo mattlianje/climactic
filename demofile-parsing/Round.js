@@ -56,8 +56,8 @@ class Round {
 
     for(var j = 0; j < this.eventRates.length; j++) {
       if (this.eventRates[j] > avg/3) {
-        var start = this.keyEvents[j].time - 2;
-        var end = this.keyEvents[j+1].time + 2;
+        var start = this.keyEvents[j].time - 3;
+        var end = this.keyEvents[j+1].time + 3;
         this.highRateTimes.push([start, end]);
       }
     }

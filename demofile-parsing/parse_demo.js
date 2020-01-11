@@ -2,8 +2,8 @@ const fs = require("fs");
 const demofile = require("demofile");
 const path = require("path");
 const Round = require("./Round.js");
-const DEBUG = false; // If you want to log stuff set this to true :))) 
-const streamGameStart = 595; // specific to the stream chosen. Must set this before running
+const ClipTemplate = require("./ClipTemplate.js");
+const DEBUG = true; // If you want to log stuff set this to true :))) 
 var demoGameStart = null;
 
 // maps seconds time of demofile to timestamp of video
@@ -20,9 +20,25 @@ function secondsToTimestamp(seconds, demoStart, streamStart) {
   return `${hours}h${mins}m${seconds}s`;
 }
 
+
+// Given a twitch vod or youtube video it will extract the video ID
+function getVideoId(url) {
+  var videoId = null;
+  if (url.includes("youtube")) {
+    videoId = url.split("v=")[1];
+    var ampersand = videoId.indexOf('&');
+    if (ampersand != -1) {
+      videoId = videoId.substring(0, ampersand);
+    }
+  }
+  if (DEBUG) { console.log(videoId) };
+  return videoId;
+}
+
 var parseDemo = function(url, demPath, streamGameStart){
   fs.readFile(path.resolve(demPath), (err, buffer) => {
     const demoFile = new demofile.DemoFile();
+    const outputPage = new ClipTemplate(getVideoId(url));
     const rounds = [];
     var roundEvents = [];
     var roundLatestStart = 0;
@@ -59,6 +75,9 @@ var parseDemo = function(url, demPath, streamGameStart){
         round.mergeTimeRanges();
         round.getKills();
         console.log(round.getStreamTimestamps(demoGameStart, streamGameStart));
+        // write highlights to output page
+        outputPage.addRoundHighlights(round.highlights, demoGameStart, streamGameStart, roundIndex);
+        outputPage.writeToFile("output.html");
         // reset roundEvents 
         roundEvents = [];
         // log round end
@@ -67,7 +86,7 @@ var parseDemo = function(url, demPath, streamGameStart){
           round.plotAllEvents();
           round.plotHighRates();
           round.plotHighlightTimes();
-          round.getKills();
+          // round.getKills();
           console.log(`set demoGameStart to: ${demoGameStart}`);
         }
         roundIndex++;
