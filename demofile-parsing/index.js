@@ -1,18 +1,14 @@
 const inquirer = require('inquirer');
+const { TEST_URL, TEST_FILE_PATH, TEST_START_TIME, TESTING } = require('./constants');
 
 console.log(`Welcome to the Highlight Generator Tool`);
-console.log();
-var testURL = "https://www.twitch.tv/videos/449439967"; // Change according to Testing needs
-var testFilePath = "C:/Users/eldri/Documents/GitHub/Local_Files/heroic-vs-ence-mirage.dem"; // Change according to Testing needs
-var testStartTime = 2000; // Change according to Testing needs
 
-const TESTING = false; //Turn this on to skip prompts when testing
 
 if(TESTING){ 
     console.log(`Parse Running...`);
     console.log();
     var parseDemo = require('./parse_demo.js');
-    parseDemo(testURL,testFilePath,testStartTime);
+    parseDemo(TEST_URL, TEST_FILE_PATH, TEST_START_TIME);
 }
 else {
     console.log(`Please provide the following...`);
