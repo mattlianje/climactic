@@ -1,23 +1,18 @@
 const inquirer = require('inquirer');
+const { TEST_URL, TEST_FILE_PATH, TEST_START_TIME, TESTING } = require('./constants');
+const Logger = require('./Logger');
 
-console.log(`Welcome to the Highlight Generator Tool`);
-console.log();
-var testURL = "https://www.twitch.tv/videos/449439967"; // Change according to Testing needs
-var testFilePath = "C:/Users/eldri/Documents/GitHub/Local_Files/heroic-vs-ence-mirage.dem"; // Change according to Testing needs
-var testStartTime = 2000; // Change according to Testing needs
-
-const TESTING = false; //Turn this on to skip prompts when testing
+Logger.log(`Welcome to the Highlight Generator Tool`);
 
 if(TESTING){ 
-    console.log(`Parse Running...`);
-    console.log();
+    Logger.log('Parse Running...');
     var parseDemo = require('./parse_demo.js');
-    parseDemo(testURL,testFilePath,testStartTime);
+    parseDemo(TEST_URL, TEST_FILE_PATH, TEST_START_TIME);
 }
 else {
-    console.log(`Please provide the following...`);
-    console.log(`======================================`);
-    console.log();
+    Logger.log(`Please provide the following...`);
+    Logger.log(`======================================`);
+    Logger.log();
     var questions = [
         {
             type: 'editor',
@@ -47,15 +42,15 @@ else {
         inputFile = answers['inputFile'];
         inputStartTime = answers['inputStartTime'];
         if (answers['startPrompt'] == "No") {
-            console.log(`======================================`);
-            console.log(`Lets try this again.`);
+            Logger.log(`======================================`);
+            Logger.log(`Lets try this again.`);
             getUserInput();
         } else {
-            console.log(`======================================`);
-            console.log(`You entered: ${inputURL}, ${inputFile}, ${inputStartTime}`);
-            console.log();
-            console.log(`Parse Running...`);
-            console.log();
+            Logger.log(`======================================`);
+            Logger.log(`You entered: ${inputURL}, ${inputFile}, ${inputStartTime}`);
+            Logger.log();
+            Logger.log(`Parse Running...`);
+            Logger.log();
             var parseDemo = require('./parse_demo.js');
             parseDemo(inputURL,inputFile,inputStartTime);
         }
