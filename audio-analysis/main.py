@@ -37,8 +37,3 @@ elif answer == 'csv' or 2:
         print("\n --------------------------------")
 elif answer == 'test' or 3:
     saveVideo("https://www.youtube.com/watch?v=JZRXESV3R74", True)
-
-
-
-
-
