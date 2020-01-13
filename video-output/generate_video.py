@@ -1,10 +1,12 @@
 from moviepy.editor import *
 import json
 
+pathToFullVideo = "/Users/tylerlam/Downloads/CSGO - Liquid vs. mousesports [Cache] Map 1 - GRAND FINAL - ESL One New York 2018.mp4"
+
 with open("../demofile-parsing/timestamps.json", "r") as read_file:
     data = json.load(read_file)
 
-fullvideo = VideoFileClip("/Users/tylerlam/Downloads/CSGO - Liquid vs. mousesports [Cache] Map 1 - GRAND FINAL - ESL One New York 2018.mp4")
+fullvideo = VideoFileClip(pathToFullVideo)
 
 clips = []
 roundNumber = 1
