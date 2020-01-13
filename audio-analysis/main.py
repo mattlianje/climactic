@@ -1,15 +1,15 @@
 import videoHelper
+import pandas as pd
 
-trumpVideo = videoHelper.videoObject('https://www.youtube.com/watch?v=JZRXESV3R74', False)
-print(trumpVideo.getFilename())
-trumpVideo.getAudio()
-trumpVideo.getTextAnalysis()
-trumpVideo.getAmplitudeAnalysis()
-
-
-
-
-
+# Save Video function creates a video object and outputs all the nice analysis stuff
+# Will add a function to consolidate video data into a dictionary 
+# Will add a function to push video dictionaries to SQL table
+def saveVideo(url, tag):
+    video = videoHelper.videoObject(url, tag)
+    print(video.getFilename())
+    video.getAudio()
+    video.getTextAnalysis()
+    video.getAmplitudeAnalysis()
     df = pd.DataFrame(video.amplitude_list)
     print(df)
 
