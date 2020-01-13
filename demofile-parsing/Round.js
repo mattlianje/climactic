@@ -84,13 +84,15 @@ class Round {
   }
 
   getStreamTimestamps(demoGameStart, streamGameStart) {
-    var result = [];
+    var asTimestamps = [];
+    var asSeconds = []
     for (var i = 0; i < this.highlights.length; i++) {
-      var s = this.highlights[i][0] - demoGameStart + streamGameStart;
-      var e = this.highlights[i][1] - demoGameStart + streamGameStart;
-      result.push([this.secondsToTimestamp(s), this.secondsToTimestamp(e)]);
+      var s = Math.floor(this.highlights[i][0] - demoGameStart + streamGameStart);
+      var e = Math.floor(this.highlights[i][1] - demoGameStart + streamGameStart);
+      asSeconds.push([s, e]);
+      asTimestamps.push([this.secondsToTimestamp(s), this.secondsToTimestamp(e)]);
     }
-    return result;
+    return { timestamps: asTimestamps, timestampsAsSeconds: asSeconds };
   }
 
   secondsToTimestamp(seconds) {
