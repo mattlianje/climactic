@@ -104,7 +104,7 @@ const parseDemo = async (url, demPath, streamGameStart) => {
     }
     Logger.log("Demofile parsing complete.");
     Logger.debug(allHighlights);
-
+    // write highlights to json file after parsing is finished
     fs.writeFile("./timestamps.json", JSON.stringify(allHighlights), (err) => {
       if (err) {
           Logger.log(err);
