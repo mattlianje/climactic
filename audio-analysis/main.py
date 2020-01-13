@@ -15,14 +15,14 @@ def saveVideo(url, tag):
 answer = input("Option 1. single | Option 2. csv | Option 3. test \n")
 
 #If user wants to upload only a single video
-if answer == 'single' or 1:
+if answer == 'single' or answer == '1':
     url = input("Provide YT Link: ")
     tag = input("Provide highlight tag (True/False): ")
     print("Link: ", url)
     print("Tag: ", tag)
     saveVideo(url, tag)
 #If user wants to upload only a CSV of videos
-elif answer == 'csv' or 2:
+elif answer == 'csv' or answer == '2':
     inputCSV = input("Provide csv with file and path \n")
     tuplesDF = pd.read_csv(inputCSV)
     print(tuplesDF.head())
@@ -35,7 +35,7 @@ elif answer == 'csv' or 2:
         saveVideo(url, tag)
         i += 1
         print("\n --------------------------------")
-elif answer == 'test' or 3:
+elif answer == 'test' or answer == '3':
     saveVideo("https://www.youtube.com/watch?v=JZRXESV3R74", True)
 
 
