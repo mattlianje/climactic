@@ -105,7 +105,7 @@ class videoObject:
         # Test dictionary for graphing amplitudes
         raw_amplitudes = {}
 
-        fc, ic = 1, 1
+        fc, ic, fc_continuous = 1, 1, 1
         amp_sum, max_amp, min_amp = 0, 0, 0
 
         for c in range(len(amp_data)):
@@ -114,7 +114,14 @@ class videoObject:
 
                 # Calculate average amplitude in interval
                 interval_avg = amp_sum / fc
-                interval_amplitudes['Interval', ic] = interval_avg
+                interval_amplitudes[ic] = interval_avg
+
+                #Dictionary for specific interval
+                interval_dict = {   'amplitude': interval_avg,
+                                    'start_time_ms': ((fc_continuous/fs) - interval),
+                                    'end_time_ms': (fc_continuous/fs),
+                                    'url': self.url
+                                }
 
                 raw_amplitudes[ic] = interval_avg
 
@@ -128,10 +135,16 @@ class videoObject:
                 fc = 0
                 amp_sum = 0
                 ic += 1
-            fc += 1
 
-        for x, y in interval_amplitudes.items():
-            print(x, y)
+                #Append to Video Object Amplitude List
+                self.amplitude_list.append(dict(interval_dict))
+
+            fc += 1
+            fc_continuous += 1
+
+        #Commented out but decided to keep in case, loop through interval_amplitudes intervals and outputs them
+        #for x, y in interval_amplitudes.items():
+        #    print(x, y)
 
         print('Max Amplitude: ', max_amp)
         print('Min Amplitude: ', min_amp)
