@@ -9,6 +9,8 @@ import pocketsphinx
 from scipy.io import wavfile
 import wave
 import matplotlib.pylab as plt
+from textblob import TextBlob
+import math
 
 ydl_opts = {
             'format': 'bestaudio/best',
@@ -23,6 +25,8 @@ class videoObject:
     def __init__(self, url, isHighlight):
         self.url = url
         self.highlight = isHighlight
+        self.word_list = []
+        self.amplitude_list = []
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             self.info_dict = ydl.extract_info(self.url, download=False)
@@ -68,17 +72,15 @@ class videoObject:
             # Prints out all the words and their start and end timestamps.
             for seg in decoder.seg():
                 print(seg.word, seg.start_frame, seg.end_frame)
+                word_dict = {'word': seg.word,
+                             'start_time_ms': math.trunc(seg.start_frame/100),
+                             'end_time_ms': math.trunc(seg.end_frame/100),
+                             'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
+                             'polarity': TextBlob(seg.word).sentiment.polarity,
+                             'url': self.url
+                             }
+                self.word_list.append(dict(word_dict))
 
-                # Run a test where the word stupid gets saved as a new audio file.
-                if (seg.word == 'stupid'):
-                    print('******', seg.word)
-                    print('******', seg.start_frame, seg.end_frame)
-                    t1 = (seg.start_frame - 50) * 10
-                    t2 = (seg.end_frame + 300) * 10
-
-                    stupidAudio = AudioSegment.from_wav(AUDIO_FILE)
-                    stupidAudio = stupidAudio[t1:t2]
-                    stupidAudio.export('newStupid.wav', format='wav')  # exports a wav to the current path
 
     # Performs amplitude analysis
     def getAmplitudeAnalysis(self):
