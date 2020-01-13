@@ -1,6 +1,8 @@
 import videoHelper
 import pandas as pd
 
+TESTING = False #Define if you are testing or not. Make sure to check videoHelper.py for testing too
+
 # Save Video function creates a video object and outputs all the nice analysis stuff
 # Will add a function to consolidate video data into a dictionary 
 # Will add a function to push video dictionaries to SQL table
@@ -11,9 +13,12 @@ def saveVideo(url, tag):
     video.getTextAnalysis()
     video.getAmplitudeAnalysis()
 
-    #For testing, will be removed after PR is approved
-    df = pd.DataFrame(video.amplitude_list) 
-    print(df)
+    if (TESTING):
+        df1 = pd.DataFrame(video.word_list) 
+        df2 = pd.DataFrame(video.amplitude_list) 
+        print(df1)
+        print(df2)
+    
 
 ##### Prompt for Highlight Video and Tagging #####
 answer = input("Option 1. single | Option 2. csv | Option 3. test \n")

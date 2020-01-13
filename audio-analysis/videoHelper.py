@@ -21,6 +21,8 @@ ydl_opts = {
             }],
         }
 
+TESTING = False #Define if you are testing or not. Make sure to check main.py for testing too
+
 class videoObject:
     def __init__(self, url, isHighlight):
         self.url = url
@@ -71,7 +73,8 @@ class videoObject:
 
             # Prints out all the words and their start and end timestamps.
             for seg in decoder.seg():
-                print(seg.word, seg.start_frame, seg.end_frame)
+                if (TESTING):
+                    print(seg.word, seg.start_frame, seg.end_frame)
                 word_dict = {'word': seg.word,
                              'start_time_ms': math.trunc(seg.start_frame/100),
                              'end_time_ms': math.trunc(seg.end_frame/100),
@@ -145,8 +148,9 @@ class videoObject:
             fc_continuous += 1
 
         #Commented out but decided to keep in case, loop through interval_amplitudes intervals and outputs them
-        #for x, y in interval_amplitudes.items():
-        #    print(x, y)
+        if (TESTING):
+            for x, y in interval_amplitudes.items():
+                print(x, y)
 
         print('Max Amplitude: ', max_amp)
         print('Min Amplitude: ', min_amp)
