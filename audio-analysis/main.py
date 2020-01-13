@@ -10,7 +10,9 @@ def saveVideo(url, tag):
     video.getAudio()
     video.getTextAnalysis()
     video.getAmplitudeAnalysis()
-    df = pd.DataFrame(video.amplitude_list)
+    
+    #For testing, will be removed after PR is approved
+    df = pd.DataFrame(video.amplitude_list) 
     print(df)
 
 ##### Prompt for Highlight Video and Tagging #####
