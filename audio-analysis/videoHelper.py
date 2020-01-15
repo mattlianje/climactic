@@ -21,12 +21,13 @@ ydl_opts = {
             }],
         }
 
-TESTING = False #Define if you are testing or not. Make sure to check main.py for testing too
+# TESTING = False
 
 class videoObject:
-    def __init__(self, url, isHighlight):
+    def __init__(self, url, isHighlight, isTest):
         self.url = url
         self.highlight = isHighlight
+        self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
 
@@ -73,14 +74,15 @@ class videoObject:
 
             # Prints out all the words and their start and end timestamps.
             for seg in decoder.seg():
-                if (TESTING):
+                if (self.isTest == True):
                     print(seg.word, seg.start_frame, seg.end_frame)
-                word_dict = {'word': seg.word,
-                             'start_time_ms': math.trunc(seg.start_frame/100),
-                             'end_time_ms': math.trunc(seg.end_frame/100),
-                             'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
-                             'polarity': TextBlob(seg.word).sentiment.polarity,
-                             'url': self.url
+                word_dict = {
+                                 'word': seg.word,
+                                 'start_time_s': math.trunc(seg.start_frame/100),
+                                 'end_time_s': math.trunc(seg.end_frame/100),
+                                 'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
+                                 'polarity': TextBlob(seg.word).sentiment.polarity,
+                                 'url': self.url
                              }
                 self.word_list.append(dict(word_dict))
 
@@ -122,9 +124,10 @@ class videoObject:
                 interval_amplitudes[ic] = interval_avg
 
                 #Dictionary for specific interval
-                interval_dict = {   'amplitude': interval_avg,
-                                    'start_time_ms': ((fc_continuous/fs) - interval),
-                                    'end_time_ms': (fc_continuous/fs),
+                interval_dict = {
+                                    'amplitude': interval_avg,
+                                    'start_time_s': int((fc_continuous/fs) - interval),
+                                    'end_time_s': int(fc_continuous/fs),
                                     'url': self.url
                                 }
 
@@ -148,12 +151,12 @@ class videoObject:
             fc_continuous += 1
 
         #Commented out but decided to keep in case, loop through interval_amplitudes intervals and outputs them
-        if (TESTING):
+        if (self.isTest == True):
             for x, y in interval_amplitudes.items():
                 print(x, y)
 
-        print('Max Amplitude: ', max_amp)
-        print('Min Amplitude: ', min_amp)
+            print('Max Amplitude: ', max_amp)
+            print('Min Amplitude: ', min_amp)
 
         # We must sort the dictionary to be able to iterate through it.
         plt.plot(*zip(*sorted(raw_amplitudes.items())))
