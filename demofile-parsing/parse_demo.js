@@ -40,7 +40,7 @@ const parseDemo = async (url, demPath, streamGameStart) => {
   const demoFile = new demofile.DemoFile();
   const outputPage = new ClipTemplate(getVideoId(url));
   const rounds = [];
-  const roundEvents = [];
+  var roundEvents = [];
   const allHighlights = [];
   var roundLatestStart = 0;
   var roundOn = false;
