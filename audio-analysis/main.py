@@ -1,23 +1,43 @@
 import videoHelper
 import pandas as pd
+import sys
+import lib.etl.dfHelper as dfHelper
 
-TESTING = False #Define if you are testing or not. Make sure to check videoHelper.py for testing too
+# Pass `python main.py log` as optional arg to see print statements
+TESTING = False
+if len(sys.argv) == 2:
+    if sys.argv[1] == 'log':
+        TESTING = True #Define if you are testing or not. Make sure to check videoHelper.py for testing too
 
-# Save Video function creates a video object and outputs all the nice analysis stuff
-# Will add a function to consolidate video data into a dictionary 
-# Will add a function to push video dictionaries to SQL table
-def saveVideo(url, tag):
-    video = videoHelper.videoObject(url, tag)
+# analyzeVideoSound creates a video object and outputs all the nice analysis stuff ...
+# inputs:
+# url <- YouTube url of video to extract audio from
+# tag <- True if video is highlight, else False
+#
+# outputs:
+# Summary statistics wip ...
+
+def analyzeVideoSound(url, tag):
+    video = videoHelper.videoObject(url, tag, TESTING)
     print(video.getFilename())
     video.getAudio()
     video.getTextAnalysis()
     video.getAmplitudeAnalysis()
 
     if (TESTING):
-        df1 = pd.DataFrame(video.word_list) 
-        df2 = pd.DataFrame(video.amplitude_list) 
-        print(df1)
-        print(df2)
+        df1 = pd.DataFrame(video.word_list)
+        # We do not need two end_time_s_x and end_time_s_y columns :)
+        df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
+        join_condition = ['start_time_s', 'url']
+        # print(df1)
+        # print(df2)
+        df3 = dfHelper.customLeftJoin(df1, df2, join_condition)
+        if (df3.shape[0] == df1.shape[0]):
+            print('Join successful!')
+        else:
+            print('Join failed ... each word does not have an amplitude')
+        print(df3)
+
     
 
 ##### Prompt for Highlight Video and Tagging #####
@@ -29,7 +49,8 @@ if answer == 'single' or answer == '1':
     tag = input("Provide highlight tag (True/False): ")
     print("Link: ", url)
     print("Tag: ", tag)
-    saveVideo(url, tag)
+    analyzeVideoSound(url, tag)
+
 #If user wants to upload only a CSV of videos
 elif answer == 'csv' or answer == '2':
     inputCSV = input("Provide csv with file and path \n")
@@ -41,8 +62,9 @@ elif answer == 'csv' or answer == '2':
         url = tuplesDF.loc[i, 'YT_LINK']
         tag = tuplesDF.loc[i, 'H_TAG']
         print("Link: ", url, " | Tag: ", tag)
-        saveVideo(url, tag)
+        analyzeVideoSound(url, tag)
         i += 1
         print("\n --------------------------------")
+
 elif answer == 'test' or answer == '3':
-    saveVideo("https://www.youtube.com/watch?v=JZRXESV3R74", True)
+    analyzeVideoSound("https://www.youtube.com/watch?v=JZRXESV3R74", True)
