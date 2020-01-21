@@ -2,6 +2,8 @@ import videoHelper
 import pandas as pd
 import sys
 import lib.etl.dfHelper as dfHelper
+import pymysql
+from sqlalchemy import create_engine
 
 # Pass `python main.py log` as optional arg to see print statements
 TESTING = False
@@ -37,6 +39,11 @@ def analyzeVideoSound(url, tag):
         else:
             print('Join failed ... each word does not have an amplitude')
         print(df3)
+        df3.to_csv("data_export.csv", header=True)
+
+        engine = create_engine('mysql+pymysql://root:root@localhost/climactic_test')
+        df3.to_sql("test_table", con=engine, if_exists='replace')
+
 
     
 
