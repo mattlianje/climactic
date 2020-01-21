@@ -17,14 +17,13 @@ def sqlConnectionSetup():
 
     # Check if table already exists
     for _t in meta.tables:
-        if _t == 'test_table':
-            table_exists = True
+        if _t == 'test_table': return
 
     # If table doesn't exist, create it
     if table_exists == False:
         # Declare a table
         table = Table('test_table',meta,
-                    Column('id',Integer, primary_key=True),
+                    Column('id',Integer, primary_key=True, autoincrement=True),
                     Column('index',Integer),
                     Column('end_time_s',Integer),
                     Column('polarity',Float),
@@ -46,7 +45,4 @@ def urlExists(url):
     print("Number of rows in database for this video", result.rowcount)
 
     # If URL does exist return True
-    if result.rowcount > 0:
-        return True
-    else:
-        return False
+    return result.rowcount > 0

@@ -11,6 +11,8 @@ TESTING = False
 if len(sys.argv) == 2:
     if sys.argv[1] == 'log':
         TESTING = True #Define if you are testing or not. Make sure to check videoHelper.py for testing too
+# Using this Trump Video for testing
+trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
 
 # analyzeVideoSound creates a video object and outputs all the nice analysis stuff ...
 # inputs:
@@ -19,7 +21,6 @@ if len(sys.argv) == 2:
 #
 # outputs:
 # Summary statistics wip ...
-
  
 def analyzeVideoSound(url, tag):
     global engine
@@ -86,11 +87,11 @@ def prompt():
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        url_exists = urlExists("https://www.youtube.com/watch?v=JZRXESV3R74")
+        url_exists = urlExists(trump_video)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
-            analyzeVideoSound("https://www.youtube.com/watch?v=JZRXESV3R74", True)
+            analyzeVideoSound(trump_video, True)
 
 sqlConnectionSetup()
 prompt()
