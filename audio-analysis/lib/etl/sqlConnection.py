@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, 
 # Currently working on localhost
 # MAKE SURE YOU HAVE A DATABASE CALLED 'climactic_test'
 
-engine = create_engine('mysql+pymysql://root@localhost/climactic_test') # Make sure you use the correct username "root" and password
+engine = create_engine('mysql+pymysql://root:root@localhost/climactic_test') # Make sure you use the correct username "root" and password
 
 #SQL Connection Setup - Checks if table exists and if URL to be input already exists
 def sqlConnectionSetup():
