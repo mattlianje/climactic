@@ -64,7 +64,6 @@ class videoObject:
     def getTextAnalysis(self):
         dst = self.getFilenameWav()
         # We can use .wav .aiff or .flac with this lib.
-        #AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), dst)
         AUDIO_FILE = dst
         # Uses AUDIO-FILE to do a speech to text.
         r = sr.Recognizer()

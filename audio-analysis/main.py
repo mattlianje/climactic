@@ -22,7 +22,6 @@ trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
  
 def analyzeVideoSound(url, tag):
     global engine
-    # global engine = sqlConnection.engine
     video = videoHelper.videoObject(url, tag, TESTING)
     print(video.getFilename())
     video.getAudio()
