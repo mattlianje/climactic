@@ -34,12 +34,15 @@ def sqlConnectionSetup():
                     Column('word',String(length=500)),
                     Column('amplitude',Float),
                     Column('amplitude_peak',Integer),
+                    Column('frequency', Float),
                 )
         # Create all tables
         meta.create_all()
 
 #Function checks if url exists in table already
-def urlExists(url):
+def urlExists(url, isTest):
+    if isTest == True: return False
+
     global engine
     # Check if URL already exists
     result = engine.execute('SELECT * FROM `test_table` WHERE `url`="' + url + '"')

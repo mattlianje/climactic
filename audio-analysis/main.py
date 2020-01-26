@@ -27,8 +27,9 @@ def analyzeVideoSound(url, tag):
     video.getAudio()
     video.getTextAnalysis()
     video.getAmplitudeAnalysis()
+    video.getPitchAnalysis()
 
-    if (TESTING):
+    if (TESTING == False):
         df1 = pd.DataFrame(video.word_list)
         # We do not need two end_time_s_x and end_time_s_y columns :)
         df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
@@ -56,8 +57,9 @@ def prompt():
         tag = input("Provide highlight tag (True/False): ")
         print("Link: ", url)
         print("Tag: ", tag)
+
         #Check if video already exists
-        url_exists = urlExists(url)
+        url_exists = urlExists(url, TESTING)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
@@ -74,22 +76,25 @@ def prompt():
             url = tuplesDF.loc[i, 'YT_LINK']
             tag = tuplesDF.loc[i, 'H_TAG']
             print("Link: ", url, " | Tag: ", tag)
+
             #Check if video already exists
-            url_exists = urlExists(url)
+            url_exists = urlExists(url, TESTING)
             if url_exists == True:
                 print("This video is already in the database! Did not export.")
             else:
                 analyzeVideoSound(url, tag)
+
             i += 1
             print("\n --------------------------------")
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        url_exists = urlExists(trump_video)
+        url_exists = urlExists(trump_video, TESTING)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
             analyzeVideoSound(trump_video, True)
 
-sqlConnectionSetup()
+if (TESTING == False):
+    sqlConnectionSetup()
 prompt()
