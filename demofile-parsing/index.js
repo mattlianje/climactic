@@ -6,7 +6,7 @@ Logger.log(`Welcome to the Highlight Generator Tool`);
 
 if(TESTING){ 
     Logger.log('Parse Running...');
-    var parseDemo = require('./parse_demo.js');
+    const parseDemo = require('./parse_demo.js');
     parseDemo(TEST_URL, TEST_FILE_PATH, TEST_START_TIME);
 }
 else {
