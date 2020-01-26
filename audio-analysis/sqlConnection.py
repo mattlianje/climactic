@@ -33,6 +33,7 @@ def sqlConnectionSetup():
                     Column('word',String(length=500)),
                     Column('amplitude',Float),
                     Column('amplitude_peak',Integer),
+                    Column('frequency', Float),
                 )
         # Create all tables
         meta.create_all()

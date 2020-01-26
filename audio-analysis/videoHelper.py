@@ -11,6 +11,9 @@ import wave
 import matplotlib.pylab as plt
 from textblob import TextBlob
 import math
+import sys
+from aubio import source, pitch
+import numpy as np
 
 ydl_opts = {
             'format': 'bestaudio/best',
@@ -30,6 +33,7 @@ class videoObject:
         self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
+        self.pitch_list = []
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             self.info_dict = ydl.extract_info(self.url, download=False)
@@ -94,8 +98,8 @@ class videoObject:
         print("parameters:", obj.getparams())
         obj.close()
 
-        fs, amp_data = wavfile.read(self.getFilenameWav())
-        nf = len(amp_data)
+        fs, amp_data = wavfile.read(self.getFilenameWav()) #Frame rate and numpy array for amplitude at each frames
+        nf = len(amp_data) # Number of frames
 
         duration = round((nf / fs), 0)
         print("Duration (in seconds):", duration)
@@ -106,32 +110,29 @@ class videoObject:
         else:
             interval = 10
 
-        # Variables for Amplitude parsing
+        # Variables for Amplitude parsing & Test dictionary for graphing amplitudes
         interval_amplitudes = {}
 
-        # Test dictionary for graphing amplitudes
-        raw_amplitudes = {}
+        fc, ic, c = 1, 1, 0 # frame counter (resets every interval), interval counter, and continuous frame countes
+        amp_sum, max_amp, min_amp = 0, 0, 0 #amplitude sum, maximum amplitude, and minimum amplitude
 
-        fc, ic, fc_continuous = 1, 1, 1
-        amp_sum, max_amp, min_amp = 0, 0, 0
-
-        for c in range(len(amp_data)):
+        while c < nf:
             amp_sum += amp_data[c][0]
-            if fc == (interval * fs) or c == len(amp_data):  # If you have gone through an interval
+            if fc == (interval * fs) or c == nf-1:  # If you have gone through an interval
 
                 # Calculate average amplitude in interval
                 interval_avg = amp_sum / fc
                 interval_amplitudes[ic] = interval_avg
+                
+                #print("Value: ", interval_avg, " FC: ", fc, " C: ", c)
 
                 #Dictionary for specific interval
                 interval_dict = {
                                     'amplitude': interval_avg,
-                                    'start_time_s': int((fc_continuous/fs) - interval),
-                                    'end_time_s': int(fc_continuous/fs),
+                                    'start_time_s': int((c/fs) - interval),
+                                    'end_time_s': int(c/fs),
                                     'url': self.url
                                 }
-
-                raw_amplitudes[ic] = interval_avg
 
                 # Find Max and Min Amplitudes for reference
                 if interval_avg >= max_amp:
@@ -148,17 +149,110 @@ class videoObject:
                 self.amplitude_list.append(dict(interval_dict))
 
             fc += 1
-            fc_continuous += 1
+            c += 1
 
-        #Commented out but decided to keep in case, loop through interval_amplitudes intervals and outputs them
+
+        #If testing, loop through interval_amplitudes intervals and outputs them
         if (self.isTest == True):
             for x, y in interval_amplitudes.items():
                 print(x, y)
 
             print('Max Amplitude: ', max_amp)
             print('Min Amplitude: ', min_amp)
+            print('Length of Array: ', nf)
+            # We must sort the dictionary to be able to iterate through it.
+            plt.plot(*zip(*sorted(interval_amplitudes.items())))
+            plt.show()
 
-        # We must sort the dictionary to be able to iterate through it.
-        plt.plot(*zip(*sorted(raw_amplitudes.items())))
-        plt.show()
+    def getPitchAnalysis(self):
+        # Variables for Pitch parsing
+        fc, ic, c, interval = 1, 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count, number of seconds for each interval
+        pitch_sum, co_sum, max_pitch, min_pitch = 0, 0, 0, 0 #pitch sum, confidence sum, maximum pitch, and minimum pitch
+
+        interval_pitches = {}
+
+        win_s = 4096 # fft size
+        hop_s = 512 # hop size
+        
+        fs, audio_data = wavfile.read(self.getFilenameWav()) # Get Frame Rate and audio data
+        nf = len(audio_data) # Number of frames
+        source_file = source(self.getFilenameWav(), fs, hop_s)
+        fs = source_file.samplerate
+
+        tolerance = 0.8
+
+        pitch_o = pitch("yin", win_s, hop_s, fs)
+        pitch_o.set_unit("midi")
+        pitch_o.set_tolerance(tolerance)
+
+        pitch_data = []
+        confidence_data = []
+
+        hop_c = 0 # Hop Counter
+
+        while c <= nf:
+            while fc <= interval*fs:
+                samples, read = source_file()
+                frame_pitch = pitch_o(samples)[0]
+                pitch_data += [frame_pitch]
+                pitch_sum += frame_pitch # Using this sum to average out over interval
+                confidence = pitch_o.get_confidence()
+                confidence_data += [confidence]
+                co_sum += confidence
+
+                fc += read
+                c += read
+                hop_c += 1
+
+                if read < hop_s: break
+            
+            # Calculate average frequency in interval
+            interval_avg_p = pitch_sum / hop_c
+            interval_avg_c = co_sum / hop_c
+            interval_pitches[ic] = interval_avg_p
+
+            #print("Hop Count: ", hop_c, " Value: ", interval_avg_p, " FC: ", fc, " C: ", c)
+            
+            endtime = int(c/fs)
+            if c >= nf: endtime = math.ceil(c/fs)
+            #Dictionary for specific interval
+            interval_dict = {
+                                'pitch': interval_avg_p,
+                                'p_confidence': interval_avg_c,
+                                'start_time_s': endtime - interval,
+                                'end_time_s': endtime,
+                                'url': self.url
+                            }
+
+            # Find Max and Min Frequency for reference
+            if interval_avg_p >= max_pitch:
+                max_pitch = interval_avg_p
+            elif interval_avg_p <= min_pitch:
+                min_pitch = interval_avg_p
+
+            # Reset all counters and variables
+            fc = 0
+            ic += 1
+            pitch_sum = 0
+            hop_c = 0
+
+            #Append to Video Object Pitch List
+            self.pitch_list.append(dict(interval_dict))
+
+        duration = round((nf / fs), 0)
+
+        if (self.isTest == True):
+            print("Duration (From Pitch Analysis): ", duration)
+            for x, y in interval_pitches.items():
+                print(x, y)
+
+            print('Max Pitch: ', max_pitch)
+            print('Min Pitch: ', min_pitch)
+
+            # We must sort the dictionary to be able to iterate through it.
+            plt.plot(pitch_data)
+            plt.show()
+            plt.plot(*zip(*sorted(interval_pitches.items())))
+            plt.show()
+
 
