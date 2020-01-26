@@ -39,7 +39,9 @@ def sqlConnectionSetup():
         meta.create_all()
 
 #Function checks if url exists in table already
-def urlExists(url):
+def urlExists(url, isTest):
+    if isTest == True: return False
+
     global engine
     # Check if URL already exists
     result = engine.execute('SELECT * FROM `test_table` WHERE `url`="' + url + '"')

@@ -60,15 +60,12 @@ def prompt():
         print("Link: ", url)
         print("Tag: ", tag)
 
-        if (TESTING):
-            analyzeVideoSound(url, tag)
+        #Check if video already exists
+        url_exists = urlExists(url, TESTING)
+        if url_exists == True:
+            print("This video is already in the database! Did not export.")
         else:
-            #Check if video already exists
-            url_exists = urlExists(url)
-            if url_exists == True:
-                print("This video is already in the database! Did not export.")
-            else:
-                analyzeVideoSound(url, tag)
+            analyzeVideoSound(url, tag)
 
     #If user wants to upload only a CSV of videos
     elif answer == 'csv' or answer == '2':
@@ -82,29 +79,23 @@ def prompt():
             tag = tuplesDF.loc[i, 'H_TAG']
             print("Link: ", url, " | Tag: ", tag)
 
-            if (TESTING):
-                analyzeVideoSound(url, tag)
+            #Check if video already exists
+            url_exists = urlExists(url, TESTING)
+            if url_exists == True:
+                print("This video is already in the database! Did not export.")
             else:
-                #Check if video already exists
-                url_exists = urlExists(url)
-                if url_exists == True:
-                    print("This video is already in the database! Did not export.")
-                else:
-                    analyzeVideoSound(url, tag)
+                analyzeVideoSound(url, tag)
 
             i += 1
             print("\n --------------------------------")
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        if(TESTING):
-            analyzeVideoSound(trump_video, True)
+        url_exists = urlExists(trump_video, TESTING)
+        if url_exists == True:
+            print("This video is already in the database! Did not export.")
         else:
-            url_exists = urlExists(trump_video)
-            if url_exists == True:
-                print("This video is already in the database! Did not export.")
-            else:
-                analyzeVideoSound(trump_video, True)
+            analyzeVideoSound(trump_video, True)
 
 if (TESTING == False):
     sqlConnectionSetup()
