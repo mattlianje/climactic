@@ -1,11 +1,12 @@
 import pymysql
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Numeric
+from secrets import db_username, db_password
 
 #### SQL CONNECTION INFO ####
 # Currently working on localhost
 # MAKE SURE YOU HAVE A DATABASE CALLED 'climactic_test'
 
-engine = create_engine('mysql+pymysql://root@localhost/climactic_test') # Make sure you use the correct username "root" and password
+engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
 
 #SQL Connection Setup - Checks if table exists and if URL to be input already exists
 def sqlConnectionSetup():

@@ -1,10 +1,8 @@
-import videoHelper
-from sqlConnection import sqlConnectionSetup, urlExists, engine
 import pandas as pd
 import sys
 import lib.etl.dfHelper as dfHelper
-import pymysql
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Numeric
+import lib.utils.videoHelper as videoHelper
+from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, engine
 
 # Pass `python main.py log` as optional arg to see print statements
 TESTING = False

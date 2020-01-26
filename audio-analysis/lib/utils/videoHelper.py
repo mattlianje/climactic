@@ -11,6 +11,7 @@ import wave
 import matplotlib.pylab as plt
 from textblob import TextBlob
 import math
+filepath = 'audio-files/'
 
 ydl_opts = {
             'format': 'bestaudio/best',
@@ -19,6 +20,7 @@ ydl_opts = {
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
+            'outtmpl': 'audio-files/%(title)s-%(id)s.%(ext)s'
         }
 
 # TESTING = False
@@ -40,12 +42,12 @@ class videoObject:
 
     def getFilename(self):
         video_title = self.info_dict.get('title', None).replace(":", " -")
-        video_filename = video_title + '-' + self.url.split("=", 1)[1] + '.mp3'
+        video_filename = filepath + video_title + '-' + self.url.split("=", 1)[1] + '.mp3'
         return video_filename
 
     def getFilenameWav(self):
         video_title = self.info_dict.get('title', None)
-        filename_wav = 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
+        filename_wav = filepath + 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
         return filename_wav
 
     # Downloads mp3 from url and converts to wav
@@ -62,8 +64,7 @@ class videoObject:
     def getTextAnalysis(self):
         dst = self.getFilenameWav()
         # We can use .wav .aiff or .flac with this lib.
-        AUDIO_FILE = path.join(path.dirname(path.realpath(__file__)), dst)
-
+        AUDIO_FILE = dst
         # Uses AUDIO-FILE to do a speech to text.
         r = sr.Recognizer()
         framerate = 0.1
