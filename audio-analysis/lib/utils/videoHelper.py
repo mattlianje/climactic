@@ -114,7 +114,7 @@ class videoObject:
         # Variables for Amplitude parsing & Test dictionary for graphing amplitudes
         interval_amplitudes = {}
 
-        fc, ic, c = 1, 1, 0 # frame counter (resets every interval), interval counter, and continuous frame countes
+        fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, and continuous frame countes
         amp_sum, max_amp, min_amp = 0, 0, 0 #amplitude sum, maximum amplitude, and minimum amplitude
 
         while c < nf:
@@ -126,12 +126,12 @@ class videoObject:
                 interval_amplitudes[ic] = interval_avg
                 
                 #print("Value: ", interval_avg, " FC: ", fc, " C: ", c)
-
+                endtime = c/fs #Endtime = Counter / FrameRate
                 #Dictionary for specific interval
                 interval_dict = {
                                     'amplitude': interval_avg,
-                                    'start_time_s': int((c/fs) - interval),
-                                    'end_time_s': int(c/fs),
+                                    'start_time_s': round(endtime - (fc/fs)),
+                                    'end_time_s': round(endtime),
                                     'url': self.url
                                 }
 
@@ -166,8 +166,8 @@ class videoObject:
             plt.show()
 
     def getPitchAnalysis(self):
-        # Variables for Pitch parsing
-        fc, ic, c, interval = 1, 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count, number of seconds for each interval
+        # VARIABLES SETUP
+        fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count
         pitch_sum, co_sum, max_pitch, min_pitch = 0, 0, 0, 0 #pitch sum, confidence sum, maximum pitch, and minimum pitch
 
         interval_pitches = {}
@@ -177,6 +177,15 @@ class videoObject:
         
         fs, audio_data = wavfile.read(self.getFilenameWav()) # Get Frame Rate and audio data
         nf = len(audio_data) # Number of frames
+        duration = round((nf / fs), 0) #Duration of video in seconds
+        
+        if duration <= 600:
+            interval = 1
+        elif duration <= 3600:
+            interval = 5
+        else:
+            interval = 10
+
         source_file = source(self.getFilenameWav(), fs, hop_s)
         fs = source_file.samplerate
 
@@ -190,7 +199,8 @@ class videoObject:
         confidence_data = []
 
         hop_c = 0 # Hop Counter
-
+        index_c = 1 # Index Counter
+        
         while c <= nf:
             while fc <= interval*fs:
                 samples, read = source_file()
@@ -214,14 +224,13 @@ class videoObject:
 
             #print("Hop Count: ", hop_c, " Value: ", interval_avg_p, " FC: ", fc, " C: ", c)
             
-            endtime = int(c/fs)
-            if c >= nf: endtime = math.ceil(c/fs)
+            endtime = c/fs #Endtime = Counter / FrameRate
             #Dictionary for specific interval
             interval_dict = {
                                 'pitch': interval_avg_p,
                                 'p_confidence': interval_avg_c,
-                                'start_time_s': endtime - interval,
-                                'end_time_s': endtime,
+                                'start_time_s': round(endtime - (fc/fs)),
+                                'end_time_s': round(endtime),
                                 'url': self.url
                             }
 
@@ -236,11 +245,11 @@ class videoObject:
             ic += 1
             pitch_sum = 0
             hop_c = 0
+            c = index_c*fs
+            index_c += 1
 
             #Append to Video Object Pitch List
             self.pitch_list.append(dict(interval_dict))
-
-        duration = round((nf / fs), 0)
 
         if (self.isTest == True):
             print("Duration (From Pitch Analysis): ", duration)
