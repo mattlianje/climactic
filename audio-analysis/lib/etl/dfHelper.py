@@ -24,9 +24,3 @@ def customLeftJoin(dfLeft, dfRight, joinCondition):
             joinedDf.at[index, 'amplitude_peak'] = True
 
     return joinedDf
-
-def checkJoin(dfLeft, dfRight, joinDescription):
-    if (dfLeft.shape[0] == dfRight.shape[0]):
-        print('Join on "', joinDescription ,'" successful!')
-    else:
-        print('Join on "', joinDescription ,'" failed ...')
