@@ -19,14 +19,8 @@ def customLeftJoin(dfLeft, dfRight, joinCondition):
     indices = find_peaks(dfRight['amplitude'])[0]
     for index, row in joinedDf.iterrows():
         if row['start_time_s'] not in indices:
-            joinedDf.set_value(index, 'amplitude_peak', False)
+            joinedDf.at[index, 'amplitude_peak'] = False
         else:
-            joinedDf.set_value(index, 'amplitude_peak', True)
+            joinedDf.at[index, 'amplitude_peak'] = True
 
     return joinedDf
-
-def checkJoin(dfLeft, dfRight, joinDescription):
-    if (dfLeft.shape[0] == dfRight.shape[0]):
-        print('Join on "', joinDescription ,'" successful!')
-    else:
-        print('Join on "', joinDescription ,'" failed ...')

@@ -81,13 +81,15 @@ class videoObject:
             for seg in decoder.seg():
                 if (self.isTest == True):
                     print(seg.word, seg.start_frame, seg.end_frame)
+                video_title = self.info_dict.get('title', None)
                 word_dict = {
                                  'word': seg.word,
                                  'start_time_s': math.trunc(seg.start_frame/100),
                                  'end_time_s': math.trunc(seg.end_frame/100),
                                  'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
                                  'polarity': TextBlob(seg.word).sentiment.polarity,
-                                 'url': self.url
+                                 'url': self.url,
+                                 'video_title': video_title
                              }
                 self.word_list.append(dict(word_dict))
 

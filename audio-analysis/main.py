@@ -1,14 +1,19 @@
 import pandas as pd
 import sys
+import os
 import lib.etl.dfHelper as dfHelper
 import lib.utils.videoHelper as videoHelper
 from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, getEngine
+
+# Run unit tests first
+os.system('python test.py -v')
 
 # Pass `python main.py log` as optional arg to see print statements
 TESTING = False
 if len(sys.argv) == 2:
     if sys.argv[1] == 'log':
-        TESTING = True #Define if you are testing or not. Make sure to check videoHelper.py for testing too
+        TESTING = True
+
 # Using this Trump Video for testing
 trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
 
@@ -31,6 +36,21 @@ def analyzeVideoSound(url, tag):
     video.getAmplitudeAnalysis()
     video.getPitchAnalysis()
 
+    #    df1              df2                df4
+    # (time, word)   (time, amplitude)   (time, pitch)
+    #     |                |                  |
+    #     |                |                  |
+    #     V________________V                  |
+    #            |                            |
+    #            |                            |
+    #            V____________________________V
+    #           df3                |
+    #   (word, time, amplitude)    |
+    #                              |
+    #                              V
+    #                             df5
+    #                 (word, time, amplitude, pitch)
+
     df1 = pd.DataFrame(video.word_list)
     # We do not need two end_time_s_x and end_time_s_y columns :)
     df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
@@ -38,11 +58,9 @@ def analyzeVideoSound(url, tag):
     print(df1)
     print(df2)
     df3 = dfHelper.customLeftJoin(df1, df2, join_condition)
-    dfHelper.checkJoin(df3, df1, "Words - Amplitude")
     df4 = pd.DataFrame(video.pitch_list).drop(columns=['end_time_s'])  
     print(df4)
     df5 = pd.merge(df3, df4, how='left', on=join_condition)
-    dfHelper.checkJoin(df5, df3, "Words/Amplitude - Pitch")
     #Export video breakdown to CSV
     df5.to_csv("data_export.csv", header=True)
     #Export video breakdown to SQL
