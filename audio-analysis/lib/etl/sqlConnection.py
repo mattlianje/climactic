@@ -51,6 +51,7 @@ def sqlConnectionSetup(engine):
                     Column('start_time_s',Integer),
                     Column('subjectivity',Float),
                     Column('url',String(length=500)),
+                    Column('video_title', String(length=500)),
                     Column('word',String(length=500)),
                     Column('amplitude',Float),
                     Column('amplitude_peak',Integer),
