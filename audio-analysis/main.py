@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import lib.etl.dfHelper as dfHelper
 import lib.utils.videoHelper as videoHelper
-from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, engine
+from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, getEngine
 
 # Pass `python main.py log` as optional arg to see print statements
 TESTING = False
@@ -11,6 +11,8 @@ if len(sys.argv) == 2:
         TESTING = True #Define if you are testing or not. Make sure to check videoHelper.py for testing too
 # Using this Trump Video for testing
 trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
+
+engine = getEngine(TESTING)
 
 # analyzeVideoSound creates a video object and outputs all the nice analysis stuff ...
 # inputs:
@@ -29,23 +31,22 @@ def analyzeVideoSound(url, tag):
     video.getAmplitudeAnalysis()
     video.getPitchAnalysis()
 
-    if (TESTING == False):
-        df1 = pd.DataFrame(video.word_list)
-        # We do not need two end_time_s_x and end_time_s_y columns :)
-        df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
-        join_condition = ['start_time_s', 'url']
-        # print(df1)
-        # print(df2)
-        df3 = dfHelper.customLeftJoin(df1, df2, join_condition)
-        if (df3.shape[0] == df1.shape[0]):
-            print('Join successful!')
-        else:
-            print('Join failed ... each word does not have an amplitude')
-        print(df3)
-        #Export video breakdown to CSV
-        df3.to_csv("data_export.csv", header=True)
-        #Export video breakdown to SQL
-        df3.to_sql("test_table", con=engine, if_exists='append')
+    df1 = pd.DataFrame(video.word_list)
+    # We do not need two end_time_s_x and end_time_s_y columns :)
+    df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
+    join_condition = ['start_time_s', 'url']
+    print(df1)
+    print(df2)
+    df3 = dfHelper.customLeftJoin(df1, df2, join_condition)
+    dfHelper.checkJoin(df3, df1, "Words - Amplitude")
+    df4 = pd.DataFrame(video.pitch_list).drop(columns=['end_time_s'])  
+    print(df4)
+    df5 = pd.merge(df3, df4, how='left', on=join_condition)
+    dfHelper.checkJoin(df5, df3, "Words/Amplitude - Pitch")
+    #Export video breakdown to CSV
+    df5.to_csv("data_export.csv", header=True)
+    #Export video breakdown to SQL
+    df5.to_sql("test_table", con=engine, if_exists='append')
 
 ##### Prompt for Highlight Video and Tagging #####
 def prompt():
@@ -59,7 +60,7 @@ def prompt():
         print("Tag: ", tag)
 
         #Check if video already exists
-        url_exists = urlExists(url, TESTING)
+        url_exists = urlExists(url, engine)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
@@ -78,7 +79,7 @@ def prompt():
             print("Link: ", url, " | Tag: ", tag)
 
             #Check if video already exists
-            url_exists = urlExists(url, TESTING)
+            url_exists = urlExists(url, engine)
             if url_exists == True:
                 print("This video is already in the database! Did not export.")
             else:
@@ -89,12 +90,12 @@ def prompt():
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        url_exists = urlExists(trump_video, TESTING)
+        url_exists = urlExists(trump_video, engine)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
             analyzeVideoSound(trump_video, True)
 
-if (TESTING == False):
-    sqlConnectionSetup()
+
+sqlConnectionSetup(engine)
 prompt()

@@ -3,14 +3,34 @@ from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, 
 from secrets import db_username, db_password
 
 #### SQL CONNECTION INFO ####
-# Currently working on localhost
 # MAKE SURE YOU HAVE A DATABASE CALLED 'climactic_test'
 
-engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
+
+def getEngine(isTest):
+    if isTest:
+        try:
+            engine = create_engine('mysql+pymysql://root:root@localhost/climactic_test')
+            engine.connect()
+            print("\nYou are connected to ", engine, "\n")
+        except Exception:
+            engine = create_engine('mysql+pymysql://root@localhost/climactic_test')
+            engine.connect()
+            print("\nYou are connected to ", engine, "\n")
+        except:
+            print("\n ERROR: Issues connecting to your localhost \n")
+            
+    else:
+        try:
+            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
+            engine.connect()
+            print("\nYou are connected to ", engine, "\n")
+        except:
+            print("\n ERROR: Issues connecting to the AWS database \n")
+    
+    return engine
 
 #SQL Connection Setup - Checks if table exists and if URL to be input already exists
-def sqlConnectionSetup():
-    global engine
+def sqlConnectionSetup(engine):
     table_exists = False #Variable to check if table exists
     # Create a metadata instance
     meta = MetaData(engine)
@@ -34,16 +54,14 @@ def sqlConnectionSetup():
                     Column('word',String(length=500)),
                     Column('amplitude',Float),
                     Column('amplitude_peak',Integer),
-                    Column('frequency', Float),
+                    Column('pitch',Float),
+                    Column('p_confidence',Float),
                 )
         # Create all tables
         meta.create_all()
 
 #Function checks if url exists in table already
-def urlExists(url, isTest):
-    if isTest == True: return False
-
-    global engine
+def urlExists(url, engine):
     # Check if URL already exists
     result = engine.execute('SELECT * FROM `test_table` WHERE `url`="' + url + '"')
     print("Number of rows in database for this video", result.rowcount)
