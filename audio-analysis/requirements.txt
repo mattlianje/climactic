@@ -18,3 +18,4 @@ SpeechRecognition==3.8.1
 textblob==0.15.3
 youtube-dl==2020.1.15
 aubio==0.4.9
+librosa==0.7.2

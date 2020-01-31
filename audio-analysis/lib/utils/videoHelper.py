@@ -14,6 +14,9 @@ import math
 import sys
 from aubio import source, pitch
 import numpy as np
+import librosa
+from librosa import display
+
 filepath = 'audio-files/'
 
 ydl_opts = {
@@ -36,6 +39,7 @@ class videoObject:
         self.word_list = []
         self.amplitude_list = []
         self.pitch_list = []
+        self.mfcc_list = []
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             self.info_dict = ydl.extract_info(self.url, download=False)
@@ -253,7 +257,7 @@ class videoObject:
             #Append to Video Object Pitch List
             self.pitch_list.append(dict(interval_dict))
 
-        if (self.isTest == True):
+        if (self.isTest):
             print("Duration (From Pitch Analysis): ", duration)
             for x, y in interval_pitches.items():
                 print(x, y)
@@ -268,3 +272,66 @@ class videoObject:
             plt.show()
 
 
+    def getMFCCAnalysis(self):
+        fn = self.getFilenameWav() #File Name
+        c, cs, fc, ic = 1, 1, 1, 1 # Overall counter and counter in each interval 
+        interval = 1 #Interval count in seconds for MFCC
+        interval_audio_data = np.empty([0,0]) #Array for audio data of each interval
+
+        librosa_audio, librosa_sample_rate = librosa.load(fn)
+        scipy_sample_rate, scipy_audio = wavfile.read(fn)
+
+        nf = len(librosa_audio) # Number of frames
+        duration = nf / librosa_sample_rate #Duration of audio
+
+        while c < nf:
+            if fc == interval*librosa_sample_rate:
+                interval_audio_data = librosa_audio[cs:c]
+                
+                mfccs = librosa.feature.mfcc(y=interval_audio_data, sr=librosa_sample_rate, n_mfcc = 60)
+                mfccs_processed = np.mean(mfccs.T,axis=0)
+                
+                endtime = c/librosa_sample_rate #Endtime = Counter / FrameRate
+                #Dictionary for specific interval
+                interval_dict = {
+                    'start_time_s': round(endtime - (fc/librosa_sample_rate)),
+                    'end_time_s': round(endtime),
+                    'url': self.url
+                }
+                x = 0
+                while x < len(mfccs_processed):
+                    #print(mfccs_processed[x])
+                    interval_dict['mfcc_' + str(x+1)] = mfccs_processed[x]
+                    x += 1
+
+                #Append to Video Object Pitch List
+                self.mfcc_list.append(dict(interval_dict))
+
+                if c <= interval*librosa_sample_rate: 
+                    plt.figure(figsize=(8,8))
+                    librosa.display.specshow(mfccs, sr=librosa_sample_rate, x_axis='time')
+
+                #Reset Counters
+                fc = 0
+                ic += 1
+                cs = c + 1
+            
+            c += 1
+            fc += 1
+
+        if (self.isTest):
+            print("Duration (in seconds):", duration, "; Rounded: ", round(duration))
+
+            print("Original sample rate: {}".format(scipy_sample_rate))
+            print("Librosa sample rate: {}".format(librosa_sample_rate))
+            print("\n Data: ", librosa_audio)
+
+            print('Original audio file min~max range: {} to {}'.format(np.min(scipy_audio), np.max(scipy_audio)))
+            print('Librosa audio file min~max range: {0:.2f} to {0:.2f}'.format(np.min(librosa_audio), np.max(librosa_audio)))
+
+            # Librosa: mono track
+            plt.figure(figsize=(12,4))
+            plt.plot(librosa_audio)
+            plt.show()
+
+        
