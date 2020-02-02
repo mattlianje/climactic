@@ -35,21 +35,22 @@ def analyzeVideoSound(url, tag):
     video.getTextAnalysis()
     video.getAmplitudeAnalysis()
     video.getPitchAnalysis()
+    video.getMFCCAnalysis()
 
-    #    df1              df2                df4
-    # (time, word)   (time, amplitude)   (time, pitch)
-    #     |                |                  |
-    #     |                |                  |
-    #     V________________V                  |
-    #            |                            |
-    #            |                            |
-    #            V____________________________V
-    #           df3                |
-    #   (word, time, amplitude)    |
-    #                              |
-    #                              V
-    #                             df5
-    #                 (word, time, amplitude, pitch)
+    #    df1              df2                df4                |
+    # (time, word)   (time, amplitude)   (time, pitch)          |
+    #     |                |                  |                 |  
+    #     |                |                  |                 |
+    #     V________________V                  |                 |
+    #            |                            |                 |
+    #            |                            |                 |
+    #            V____________________________V                 |
+    #           df3                |                            |
+    #   (word, time, amplitude)    |                            |
+    #                              |                            |
+    #                              V                            V
+    #                             df5                           df6
+    #                 (word, time, amplitude, pitch)          (mfcc)
 
     df1 = pd.DataFrame(video.word_list)
     # We do not need two end_time_s_x and end_time_s_y columns :)
@@ -65,6 +66,8 @@ def analyzeVideoSound(url, tag):
     df5.to_csv("data_export.csv", header=True)
     #Export video breakdown to SQL
     df5.to_sql("test_table", con=engine, if_exists='append')
+    df6 = pd.DataFrame(video.mfcc_list)
+    print(df6)
 
 ##### Prompt for Highlight Video and Tagging #####
 def prompt():
