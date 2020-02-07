@@ -1,6 +1,8 @@
 import pymysql
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Numeric
 from secrets import db_username, db_password
+import sqlalchemy as db
+import pandas as pd
 
 #### SQL CONNECTION INFO ####
 # MAKE SURE YOU HAVE A DATABASE CALLED 'climactic_test'
@@ -69,3 +71,14 @@ def urlExists(url, engine):
 
     # If URL does exist return True
     return result.rowcount > 0
+
+def getTableAsDf(table_name):
+    engine = getEngine(False)
+    metadata = db.MetaData()
+    table_obj = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
+    query = db.select([table_obj])
+    result_proxy = engine.execute(query)
+    result_set = result_proxy.fetchall()
+    result_df = pd.DataFrame(result_set)
+    result_df.columns = result_set[0].keys()
+    return result_df
