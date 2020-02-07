@@ -97,80 +97,6 @@ class videoObject:
                              }
                 self.word_list.append(dict(word_dict))
 
-
-    # Performs amplitude analysis
-    def getAmplitudeAnalysis(self):
-
-        obj = wave.open(self.getFilenameWav(), 'r')
-        print("parameters:", obj.getparams())
-        obj.close()
-
-        fs, amp_data = wavfile.read(self.getFilenameWav()) #Frame rate and numpy array for amplitude at each frames
-        nf = len(amp_data) # Number of frames
-
-        duration = round((nf / fs), 0)
-        print("Duration (in seconds):", duration)
-        if duration <= 600:
-            interval = 1
-        elif duration <= 3600:
-            interval = 5
-        else:
-            interval = 10
-
-        # Variables for Amplitude parsing & Test dictionary for graphing amplitudes
-        interval_amplitudes = {}
-
-        fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, and continuous frame countes
-        amp_sum, max_amp, min_amp = 0, 0, 0 #amplitude sum, maximum amplitude, and minimum amplitude
-
-        while c < nf:
-            amp_sum += amp_data[c][0]
-            if fc == (interval * fs) or c == nf-1:  # If you have gone through an interval
-
-                # Calculate average amplitude in interval
-                interval_avg = amp_sum / fc
-                interval_amplitudes[ic] = interval_avg
-                
-                #print("Value: ", interval_avg, " FC: ", fc, " C: ", c)
-                endtime = c/fs #Endtime = Counter / FrameRate
-                #Dictionary for specific interval
-                interval_dict = {
-                                    'amplitude': interval_avg,
-                                    'start_time_s': round(endtime - (fc/fs)),
-                                    'end_time_s': round(endtime),
-                                    'url': self.url
-                                }
-
-                # Find Max and Min Amplitudes for reference
-                if interval_avg >= max_amp:
-                    max_amp = interval_avg
-                elif interval_avg <= min_amp:
-                    min_amp = interval_avg
-
-                # Reset all counters
-                fc = 0
-                amp_sum = 0
-                ic += 1
-
-                #Append to Video Object Amplitude List
-                self.amplitude_list.append(dict(interval_dict))
-
-            fc += 1
-            c += 1
-
-
-        #If testing, loop through interval_amplitudes intervals and outputs them
-        if (self.isTest == True):
-            for x, y in interval_amplitudes.items():
-                print(x, y)
-
-            print('Max Amplitude: ', max_amp)
-            print('Min Amplitude: ', min_amp)
-            print('Length of Array: ', nf)
-            # We must sort the dictionary to be able to iterate through it.
-            plt.plot(*zip(*sorted(interval_amplitudes.items())))
-            plt.show()
-
     def getPitchAnalysis(self):
         # VARIABLES SETUP
         fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count
@@ -193,6 +119,7 @@ class videoObject:
             interval = 10
 
         source_file = source(self.getFilenameWav(), fs, hop_s)
+        print("\n", source_file, "\n")
         fs = source_file.samplerate
 
         tolerance = 0.8
@@ -228,7 +155,7 @@ class videoObject:
             interval_avg_c = co_sum / hop_c
             interval_pitches[ic] = interval_avg_p
 
-            #print("Hop Count: ", hop_c, " Value: ", interval_avg_p, " FC: ", fc, " C: ", c)
+            print("Hop Count: ", hop_c, " Value: ", interval_avg_p, " FC: ", fc, " C: ", c)
             
             endtime = c/fs #Endtime = Counter / FrameRate
             #Dictionary for specific interval
@@ -271,67 +198,96 @@ class videoObject:
             plt.plot(*zip(*sorted(interval_pitches.items())))
             plt.show()
 
+    def getAmpMFCCAnalysis(self):
+        ##################################
+        #
+        #        Variables Setup
+        #
+        ##################################
+        
+        ######## Global Variables ########
+        uselibrosa = True
+        # Frame rate and numpy array for audio at each frames
+        if uselibrosa:
+            audio_data, fs = librosa.load(self.getFilenameWav())
+        else:
+            fs, audio_data = wavfile.read(self.getFilenameWav())  
+        nf = len(audio_data) # Number of frames
+        duration = round((nf / fs), 0) #Duration in secodns
+        if duration <= 600:
+            interval = 1
+        elif duration <= 3600:
+            interval = 5
+        else:
+            interval = 10
+        ic, c, fc, cs = 1, 1, 1, 1 # interval counter, continuous frame counter, frame counter (resets every interval)
+        
+        ######## Declaration of Audio Info ########
+        print('')
+        print("Duration (in seconds):", duration, "| (in frames): ", nf)
+        print('Audio file min~max range: {0:.2f} to {0:.2f}'.format(np.min(audio_data), np.max(audio_data)))
+        print('')
 
-    def getMFCCAnalysis(self):
-        fn = self.getFilenameWav() #File Name
-        c, cs, fc, ic = 1, 1, 1, 1 # Overall counter and counter in each interval 
-        interval = 1 #Interval count in seconds for MFCC
-        interval_audio_data = np.empty([0,0]) #Array for audio data of each interval
-
-        librosa_audio, librosa_sample_rate = librosa.load(fn)
-        scipy_sample_rate, scipy_audio = wavfile.read(fn)
-
-        nf = len(librosa_audio) # Number of frames
-        duration = nf / librosa_sample_rate #Duration of audio
+        ##################################
+        #
+        #       Audio Analysis (Loop)
+        #
+        ##################################
 
         while c < nf:
-            if fc == interval*librosa_sample_rate:
-                interval_audio_data = librosa_audio[cs:c]
+            if fc == (interval * fs) or c == nf-1: # For each interval, extract the features
+                interval_audio_data = audio_data[cs:c]
+                start_time = (cs-1)/fs
+                end_time = c/fs
                 
-                mfccs = librosa.feature.mfcc(y=interval_audio_data, sr=librosa_sample_rate, n_mfcc = 60)
+                # Amplitude
+                interval_amp_avg = sum(interval_audio_data) / fc
+                amp_dict = {
+                            'amplitude': interval_amp_avg,
+                            'start_time_s': round(start_time),
+                            'end_time_s': round(end_time),
+                            'url': self.url
+                            }
+                
+                # MFCCs
+                mfccs = librosa.feature.mfcc(y=interval_audio_data, sr=fs, n_mfcc = 60)
                 mfccs_processed = np.mean(mfccs.T,axis=0)
-                
-                endtime = c/librosa_sample_rate #Endtime = Counter / FrameRate
-                #Dictionary for specific interval
-                interval_dict = {
-                    'start_time_s': round(endtime - (fc/librosa_sample_rate)),
-                    'end_time_s': round(endtime),
-                    'url': self.url
-                }
+                mfcc_dict = {
+                            'start_time_s': round(start_time),
+                            'end_time_s': round(end_time),
+                            'url': self.url
+                            }
                 x = 0
                 while x < len(mfccs_processed):
                     #print(mfccs_processed[x])
-                    interval_dict['mfcc_' + str(x+1)] = mfccs_processed[x]
+                    mfcc_dict['mfcc_' + str(x+1)] = mfccs_processed[x]
                     x += 1
 
-                #Append to Video Object Pitch List
-                self.mfcc_list.append(dict(interval_dict))
+                #Append to Video Object Lists
+                self.amplitude_list.append(dict(amp_dict))
+                self.mfcc_list.append(dict(mfcc_dict))
 
-                if c <= interval*librosa_sample_rate: 
-                    plt.figure(figsize=(8,8))
-                    librosa.display.specshow(mfccs, sr=librosa_sample_rate, x_axis='time')
+                # Debugging - Printing out values
+                if(self.isTest):
+                    print("Interval: ", ic, " FC: ", fc, " C: ", c, " CS: ", cs,)
+                    print("Audio: ", interval_amp_avg, "MFCC(1): ", mfccs_processed[0])
 
-                #Reset Counters
+                # Reset all counters
                 fc = 0
                 ic += 1
                 cs = c + 1
-            
+                    
+            # Increment through Audio    
             c += 1
             fc += 1
 
-        if (self.isTest):
-            print("Duration (in seconds):", duration, "; Rounded: ", round(duration))
 
-            print("Original sample rate: {}".format(scipy_sample_rate))
-            print("Librosa sample rate: {}".format(librosa_sample_rate))
-            print("\n Data: ", librosa_audio)
-
-            print('Original audio file min~max range: {} to {}'.format(np.min(scipy_audio), np.max(scipy_audio)))
-            print('Librosa audio file min~max range: {0:.2f} to {0:.2f}'.format(np.min(librosa_audio), np.max(librosa_audio)))
-
-            # Librosa: mono track
-            plt.figure(figsize=(12,4))
-            plt.plot(librosa_audio)
+        # Print out graphs
+        if(self.isTest):
+            amplitude_data = [d.get('amplitude') for d in self.amplitude_list]
+            plt.plot(amplitude_data)
             plt.show()
+            
+            
 
-        
+
