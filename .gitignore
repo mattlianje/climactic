@@ -1,6 +1,7 @@
 .idea/
 demofile-parsing/package-lock.json
 demofile-parsing/node_modules/
+import-clips/node_modules/
 output.html
 timestamps.json
 highlights.mp4
