@@ -1,3 +1,5 @@
+// USAGE: npm run *insert youtube vid*
+
 const fetchVideoInfo = require('youtube-info');
 const request = require('request');
 
