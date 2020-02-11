@@ -50,7 +50,7 @@ def index():
     for clip in clips:
       url, start, end = clip
       embed_url = formatYoutubeEmbedUrl(url, start, end)
-    return render_template('test.html', embedUrl= embed_url, youtubeUrl= url, start= start, end= end)
+    return render_template('index.html', embedUrl= embed_url, youtubeUrl= url, start= start, end= end)
 
 
 def formatAddLabelQuery(url, start, end, data):
@@ -69,6 +69,7 @@ def formatAddLabelQuery(url, start, end, data):
               AND start = {:}
               AND end = {:} """.format(commentator, crowd, gameplay, url, start, end)
   return query
+
 
 def formatFormInput(formData):
   try:
@@ -128,7 +129,7 @@ def addLabel():
     if 'error' in validatedData:
       error = validatedData['error']
       embed_url = formatYoutubeEmbedUrl(url, start, end)
-      return render_template('test.html', embedUrl= embed_url, youtubeUrl= url, start= start, end= end, error= error)
+      return render_template('index.html', embedUrl= embed_url, youtubeUrl= url, start= start, end= end, error= error)
     
     # connect to db 
     conn = mysql.connect()

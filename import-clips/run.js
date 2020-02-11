@@ -68,6 +68,3 @@ if (youtubeUrl) {
     sendToDB(newRows);
   });
 }
-
-
-
