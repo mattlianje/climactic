@@ -46,7 +46,7 @@ const formatRow = ( youtubeUrl, interval)  => {
 }
 
 const sendToDB = (rows) => {
-  request.post('http://127.0.0.1:5000/addClips', {
+  request.post('http://data-labelling-fydp.herokuapp.com/addClips', {
     json: {
       items: rows
     }
