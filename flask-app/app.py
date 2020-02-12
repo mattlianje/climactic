@@ -1,17 +1,16 @@
-
 from flask import Flask, render_template, json, request, redirect, url_for
 from flaskext.mysql import MySQL
 import json
+import secrets
 
 mysql = MySQL()
 app = Flask(__name__)
 
 # MySQL configurations
-# Gonna have to change these vars according to your local setup (srry)
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'root1234'
-app.config['MYSQL_DATABASE_DB'] = 'fydp'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = secrets.user
+app.config['MYSQL_DATABASE_PASSWORD'] = secrets.password
+app.config['MYSQL_DATABASE_DB'] = secrets.db
+app.config['MYSQL_DATABASE_HOST'] = secrets.host
 mysql.init_app(app)
 
 

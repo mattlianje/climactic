@@ -1,4 +1,4 @@
-// USAGE: npm run *insert youtube vid*
+// USAGE: npm start *insert youtube vid*
 
 const fetchVideoInfo = require('youtube-info');
 const request = require('request');
@@ -69,4 +69,6 @@ if (youtubeUrl) {
     newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval))
     sendToDB(newRows);
   });
+} else {
+  console.log(" USAGE: npm start *insert youtube vid url*");
 }
