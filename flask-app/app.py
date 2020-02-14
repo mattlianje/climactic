@@ -73,14 +73,20 @@ def formatAddLabelQuery(url, start, end, data):
 def formatFormInput(formData):
   try:
     if formData['shortcut']:
-      inputText = formData['shortcut'].split(',')
-      if len(inputText) < 3:
-        return {'error': 'missing values'}
+      inputText = formData['shortcut']
+      inputNum = int(inputText)
+      
+      if inputNum < 111 or inputNum > 332:
+        return {'error': 'incorrrect values'}
+      
+      commentator = inputNum // 100
+      crowd = (inputNum % 100) // 10
+      gameplay = inputNum % 10
 
       data = {
-        'commentator': int(inputText[0].strip()) - 1,
-        'crowd': int(inputText[1].strip()) - 1,
-        'gameplay': int(inputText[2].strip()) - 1,
+        'commentator': commentator - 1,
+        'crowd': crowd - 1,
+        'gameplay': gameplay - 1,
       }
     else:
       if 'commentator' not in formData or 'crowd' not in formData or 'gameplay' not in formData:
