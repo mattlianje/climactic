@@ -16,7 +16,8 @@ mysql.init_app(app)
 
 def retrieveUnlabelledClips(count):
   query = """ SELECT url, start, end FROM labelled
-              WHERE labelled = 0 ORDER BY RAND()
+              WHERE completed = FALSE
+              ORDER BY RAND()
               LIMIT {:} """.format(count)
   try:
     # connect to db 
@@ -62,7 +63,7 @@ def formatAddLabelQuery(url, start, end, data):
                 commentator = {:},
                 crowd = {:},
                 gameplay = {:},
-                labelled = 1,
+                completed = TRUE,
                 updated_at = NOW()
               WHERE url = '{:}'
               AND start = {:}
