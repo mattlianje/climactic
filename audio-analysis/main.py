@@ -34,9 +34,8 @@ def analyzeVideoSound(url, tag):
     print(video.getFilename())
     video.getAudio()
     video.getTextAnalysis()
-    video.getAmplitudeAnalysis()
+    video.getAmpMFCCAnalysis()
     video.getPitchAnalysis()
-    video.getMFCCAnalysis()
 
     #    df1              df2                df4                |
     # (time, word)   (time, amplitude)   (time, pitch)          |
