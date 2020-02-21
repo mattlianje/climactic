@@ -230,7 +230,7 @@ class videoObject:
                             }
                 
                 # MFCCs
-                mfccs = librosa.feature.mfcc(y=interval_audio_data, sr=fs, n_mfcc = 60)
+                mfccs = librosa.feature.mfcc(y=interval_audio_data, sr=fs, n_mfcc = 40)
                 mfccs_processed = np.mean(mfccs.T,axis=0)
                 mfcc_dict = {
                             'start_time_s': round(start_time),

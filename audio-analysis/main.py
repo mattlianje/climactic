@@ -29,6 +29,7 @@ engine = getEngine(TESTING)
  
 def analyzeVideoSound(url, tag):
     global engine
+    global TESTING
     video = videoHelper.videoObject(url, tag, TESTING)
     print(video.getFilename())
     video.getAudio()
@@ -55,18 +56,21 @@ def analyzeVideoSound(url, tag):
     # We do not need two end_time_s_x and end_time_s_y columns :)
     df2 = pd.DataFrame(video.amplitude_list).drop(columns=['end_time_s'])
     join_condition = ['start_time_s', 'url']
-    print(df1)
-    print(df2)
     df3 = dfHelper.customLeftJoin(df1, df2, join_condition)
     df4 = pd.DataFrame(video.pitch_list).drop(columns=['end_time_s'])  
-    print(df4)
     df5 = pd.merge(df3, df4, how='left', on=join_condition)
-    #Export video breakdown to CSV
-    df5.to_csv("data_export.csv", header=True)
+    #df5.to_csv("data_export.csv", header=True) # Export video breakdown to CSV
     #Export video breakdown to SQL
     df5.to_sql("test_table", con=engine, if_exists='append')
     df6 = pd.DataFrame(video.mfcc_list)
-    print(df6)
+    #df6.to_csv("data_export_2.csv", header=True) # Export video breakdown to CSV
+    df6.to_sql("mfcc_table", con=engine, if_exists='append')
+    if TESTING:
+        print(df1)
+        print(df2)
+        print(df4)
+        print(df6)
+
 
 ##### Prompt for Highlight Video and Tagging #####
 def prompt():
