@@ -83,10 +83,11 @@ for (start, end) in intervals:
   labelledClips = np.append(labelledClips, [start, end, hasMatch])
   if len(labelledClips) % 20 == 0:
     save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
-  
+
   # print start end time for visual checking
   startMinute, startSec = divmod(start, 60)
   endMinute, endSec = divmod(end, 60)
   print(hasMatch, idx, "{:}:{:} - {:}:{:}".format(startMinute, startSec, endMinute, endSec))
 
+save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
 print("COMPLETE --- %s seconds ---" % (time.time() - exec_start))
