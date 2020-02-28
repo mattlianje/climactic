@@ -7,3 +7,4 @@ timestamps.json
 highlights.mp4
 flask-app/secrets.py
 **/__pycache__/**
+**/secrets.py
