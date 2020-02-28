@@ -74,6 +74,7 @@ print('Starting matching:')
 exec_start = time.time()
 labelledClips = np.array([])
 
+# loop through intervals and check if clip exists in highlight video
 for (start, end) in intervals:
   clip = fullAudioLib[start*sampleRate : end*sampleRate]
   hasMatch, idx = libHelper.clipExistsInFull(clip, highlightAudioLib)
