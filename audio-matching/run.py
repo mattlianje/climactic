@@ -9,6 +9,7 @@ import numpy as np
 import os.path
 import utils.librosaHelper as libHelper
 import time
+from sklearn import preprocessing
 
 # USAGE test.py [youtube url to full video] [youtuble url to highlight video]
 fullVidUrl = sys.argv[1]
@@ -24,6 +25,7 @@ if not dbHelper.urlExists(fullVidUrl):
   exit()
 
 # Download both videos
+print("Downloading videos")
 YouTube(fullVidUrl).streams[0].download("videos/", "full_video")
 YouTube(highlightUrl).streams[0].download("videos/", "highlight_video")
 
@@ -44,17 +46,24 @@ fullAudioPath = "audio/{:}_full_audio.mp3".format(fullId)
 highlightAudioPath = "audio/{:}_highlight_audio.mp3".format(highlightId)
 
 if not os.path.isfile(fullAudioPath):
+  print("saving: ", fullAudioPath)
   fullVideoAudio.write_audiofile(fullAudioPath)
 
 if not os.path.isfile(highlightAudioPath):
+  print("saving: ", highlightAudioPath)
   highlightVideoAudio.write_audiofile(highlightAudioPath)
 
 # convert audio to librosa and save
+print("converting audio to librosa")
 fullLibPath = "librosas/{:}_full.npy".format(fullId)
 highlightLibPath = "librosas/{:}_highlight.npy".format(highlightId)
 
 fullAudioLib, sampleRate = libHelper.extractLibrosa(fullAudioPath, fullLibPath)
 highlightAudioLib, sampleRate = libHelper.extractLibrosa(highlightAudioPath, highlightLibPath)
+
+# normalize both libs
+fullAudioLib = preprocessing.scale(fullAudioLib)
+highlightAudioLib = preprocessing.scale(highlightAudioLib)
 
 # Get full video intervals from db
 print('Getting intervals')

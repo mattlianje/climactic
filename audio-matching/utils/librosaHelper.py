@@ -2,7 +2,6 @@ import librosa
 import numpy as np
 from numpy import save
 from numpy import load
-from sklearn import preprocessing
 from scipy import signal
 from scipy import stats
 import os.path
@@ -21,11 +20,8 @@ def createAndSaveLibrosa(audioFilePath, targetPath):
   return (audio, sampleRate)
 
 def clipExistsInFull(clip, full):
-  # normalize
-  fullNormal = preprocessing.scale(full)
-  clipNormal = preprocessing.scale(clip)
   # run cros-correlation to find where clip occurs in full video
-  correlation = signal.fftconvolve(fullNormal, clipNormal[::-1], mode='same')
+  correlation = signal.fftconvolve(full, clip[::-1], mode='same')
   # get index of max
   idx = np.argmax(correlation)
   # check for any spikes in correlation array
