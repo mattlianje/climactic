@@ -57,7 +57,7 @@ class videoObject:
         video_title = self.info_dict.get('title', None)
         filename_wav = filepath + 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
         return filename_wav
-
+    
     # Downloads mp3 from url and converts to wav
     def getAudio(self):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -106,14 +106,8 @@ class videoObject:
         fs, audio_data = wavfile.read(self.getFilenameWav()) # Get Frame Rate and audio data
         nf = len(audio_data) # Number of frames
         duration = round((nf / fs), 0) #Duration of video in seconds
-        
-        if duration <= 600:
-            interval = 1
-        elif duration <= 3600:
-            interval = 5
-        else:
-            interval = 10
-
+        interval = 4 # Interval in seconds
+        interval_overlap = 2 # Interval overlap in seconds
         source_file = source(self.getFilenameWav(), fs, hop_s)
         print("\n", source_file, "\n")
         fs = source_file.samplerate
@@ -124,41 +118,53 @@ class videoObject:
         pitch_data = []
         confidence_data = []
         hop_c = 0 # Hop Counter
-        index_c = 1 # Index Counter
+        index_c = interval # Index Counter
         
         while c <= nf:
             while fc <= interval*fs:
                 samples, read = source_file()
                 frame_pitch = pitch_o(samples)[0]
                 pitch_data += [frame_pitch]
-                pitch_sum += frame_pitch # Using this sum to average out over interval
-                confidence = pitch_o.get_confidence()
-                confidence_data += [confidence]
-                co_sum += confidence
-
                 fc += read
                 c += read
                 hop_c += 1
 
                 if read < hop_s: break
             
-            # Calculate average frequency in interval
-            interval_avg_p = pitch_sum / hop_c
-            interval_avg_c = co_sum / hop_c
+            for interval_bucket in range(2):
+                endtime = c/fs
+                if interval_bucket == 0:
+                    if ic == 1: continue
+                    if round(endtime)%interval != 0: endtime = ic*interval
+                    endtime = endtime - interval_overlap #Endtime = Counter / FrameRate
+                starttime = endtime - interval
+                if interval_bucket == 1:
+                    if round(endtime)%interval != 0: starttime = (ic-1)*interval
+                if endtime > c/fs: endtime = c/fs
+                # Calculate average frequency in interval
+                startinterval = round((starttime*fs)/hop_s)
+                endinterval = round((endtime*fs)/hop_s)-1
+                for _p in pitch_data[startinterval:endinterval]:
+                    pitch_sum += _p    
+                interval_avg_p = pitch_sum / hop_c
+                pitch_dict = {
+                            'pitch': interval_avg_p,
+                            'start_time_s': round(starttime),
+                            'end_time_s': round(endtime),
+                            'url': self.url
+                            }
+                
+                #Debugging
+                if (self.isTest):
+                    print("Interval: ", ic, " FC: ", fc, " C: ", c, "IndexC: ", index_c, "StartTime: ", starttime, "EndTime: ", endtime)
+                    print("Interval Bucket: ", interval_bucket, "Start Interval:", startinterval, "End Interval:", endinterval)
+                    print("Pitch Sum: ", pitch_sum)
+                    print("Array Length: ", len(pitch_data), "Begin Array: ", pitch_data[startinterval], "End Array: ", pitch_data[endinterval])
+                    print("Pitch: ", interval_avg_p)
+                    print()
+                    
 
             
-            endtime = c/fs #Endtime = Counter / FrameRate
-            pitch_dict = {
-                                'pitch': interval_avg_p,
-                                'p_confidence': interval_avg_c,
-                                'start_time_s': round(endtime - (fc/fs)),
-                                'end_time_s': round(endtime),
-                                'url': self.url
-                            }
-
-            #Debugging
-            if (self.isTest):
-                print("Pitch: ", interval_avg_p, " P_Confidence: ", interval_avg_c)
 
             # Reset all counters and variables
             fc = 0
@@ -166,14 +172,14 @@ class videoObject:
             pitch_sum = 0
             hop_c = 0
             c = index_c*fs
-            index_c += 1
+            index_c += interval
 
             #Append to Video Object Pitch List
             self.pitch_list.append(dict(pitch_dict))
 
         if (self.isTest):
-            amplitude_data = [d.get('amplitude') for d in self.amplitude_list]
-            plt.plot(amplitude_data)
+            pitch_data = [d.get('pitch') for d in self.pitch_list]
+            plt.plot(pitch_data)
             plt.show()
 
 
@@ -194,12 +200,8 @@ class videoObject:
             fs, audio_data = wavfile.read(self.getFilenameWav())  
         nf = len(audio_data) # Number of frames
         duration = round((nf / fs), 0) #Duration in secodns
-        if duration <= 600:
-            interval = 1
-        elif duration <= 3600:
-            interval = 5
-        else:
-            interval = 10
+        interval = 4 # Interval in seconds
+        interval_overlap = 2 # Interval overlap in seconds
         ic, c, fc, cs = 1, 1, 1, 1 # interval counter, continuous frame counter, frame counter (resets every interval)
         
         ######## Declaration of Audio Info ########
@@ -249,12 +251,13 @@ class videoObject:
 
                 # Debugging - Printing out values
                 if(self.isTest):
-                    print("Interval: ", ic, " FC: ", fc, " C: ", c, " CS: ", cs,)
+                    print("Interval: ", ic, " FC: ", fc, " C: ", c, " CS: ", cs, "StartTime: ", start_time, "EndTime: ", end_time)
                     print("Audio: ", interval_amp_avg, "MFCC(1): ", mfccs_processed[0])
 
                 # Reset all counters
                 fc = 0
                 ic += 1
+                if c < nf-1: c = c - (interval_overlap*fs)
                 cs = c + 1
                     
             # Increment through Audio    
