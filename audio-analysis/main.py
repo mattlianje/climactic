@@ -32,7 +32,8 @@ def analyzeVideoSound(url, tag):
     global TESTING
     # Size of sliding window in seconds to partition video by.
     window_size = 4
-    video = videoHelper.videoObject(url, window_size, tag, TESTING)
+    overlap = 2
+    video = videoHelper.videoObject(url, window_size, overlap, tag, TESTING)
     print(video.getFilename())
     video.getAudio()
     video.getTextAnalysis()

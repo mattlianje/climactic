@@ -32,9 +32,10 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, windowSize, isHighlight, isTest):
+    def __init__(self, url, windowSize, overlap, isHighlight, isTest):
         self.url = url
         self.windowSize = windowSize
+        self.overlap = overlap
         self.highlight = isHighlight
         self.isTest = isTest
         self.word_list = []
@@ -52,7 +53,7 @@ class videoObject:
         return video_title
 
     def getNumberOfWindows(self):
-        num_windows = self.getDuration() // self.windowSize
+        num_windows = self.getDuration() // (self.windowSize - self.overlap)
         return num_windows
 
     def getTitle(self):
@@ -92,12 +93,11 @@ class videoObject:
             decoder = r.recognize_sphinx(audio, show_all=True)
             decoded_words = decoder.seg()
             video_title = self.info_dict.get('title', None)
-            overlap = 2
-            slide_inc = self.windowSize - overlap
-            print(slide_inc)
-            if overlap > self.windowSize:
+            # Number of seconds to move window forward by at each iteration of this sliding window.
+            slide_inc = self.windowSize - self.overlap
+            if self.overlap > self.windowSize:
                 raise Exception('ERROR - overlap must not exceed windowSize.')
-            num_windows = self.getDuration() // slide_inc
+            num_windows = self.getNumberOfWindows()
             print(decoder.seg())
 
             for i in range(0, num_windows):
@@ -109,8 +109,11 @@ class videoObject:
                 curr_win_pol_list = []
                 # Current window subjectivity list.
                 curr_win_sbj_list = []
-                # Current window word list
+                # Current window word list.
                 curr_win_words = []
+                # Handling the fencepost case.
+                if curr_win_start > self.getDuration() - self.windowSize:
+                    curr_win_end = self.getDuration()
                 for seg in decoded_words:
                     if (self.isTest == True):
                         print(seg.word, seg.start_frame, seg.end_frame)
