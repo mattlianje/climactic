@@ -32,8 +32,9 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, isHighlight, isTest):
+    def __init__(self, url, windowSize, isHighlight, isTest):
         self.url = url
+        self.windowSize = windowSize
         self.highlight = isHighlight
         self.isTest = isTest
         self.word_list = []
@@ -43,6 +44,16 @@ class videoObject:
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             self.info_dict = ydl.extract_info(self.url, download=False)
+            # video_title = self.info_dict.get('title', None)
+
+    # Returns the video duration in seconds.
+    def getDuration(self):
+        video_title = self.info_dict.get('duration', None)
+        return video_title
+
+    def getNumberOfWindows(self):
+        num_windows = self.getDuration() // self.windowSize
+        return num_windows
 
     def getTitle(self):
         video_title = self.info_dict.get('title', None)
@@ -61,7 +72,7 @@ class videoObject:
     # Downloads mp3 from url and converts to wav
     def getAudio(self):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            # Url of the youtube video - and the audio for that video will be downloaded as an mp3 in the current directory.
+            # Url of the youtube video - and the audio directory.
             ydl.download([self.url])
 
         dst = self.getFilenameWav()
@@ -79,23 +90,50 @@ class videoObject:
         with sr.AudioFile(AUDIO_FILE) as source:
             audio = r.record(source)  # read the entire audio file
             decoder = r.recognize_sphinx(audio, show_all=True)
+            decoded_words = decoder.seg()
+            video_title = self.info_dict.get('title', None)
+            overlap = 2
+            slide_inc = self.windowSize - overlap
+            print(slide_inc)
+            if overlap > self.windowSize:
+                raise Exception('ERROR - overlap must not exceed windowSize.')
+            num_windows = self.getDuration() // slide_inc
             print(decoder.seg())
 
-            # Prints out all the words and their start and end timestamps.
-            for seg in decoder.seg():
-                if (self.isTest == True):
-                    print(seg.word, seg.start_frame, seg.end_frame)
-                video_title = self.info_dict.get('title', None)
-                word_dict = {
-                                 'word': seg.word,
-                                 'start_time_s': math.trunc(seg.start_frame/100),
-                                 'end_time_s': math.trunc(seg.end_frame/100),
-                                 'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
-                                 'polarity': TextBlob(seg.word).sentiment.polarity,
+            for i in range(0, num_windows):
+                # Current window start time in s.
+                curr_win_start = i * slide_inc
+                # Current window end time  in s.
+                curr_win_end = (i * slide_inc) + self.windowSize
+                # Current window polarity list.
+                curr_win_pol_list = []
+                # Current window subjectivity list.
+                curr_win_sbj_list = []
+                # Current window word list
+                curr_win_words = []
+                for seg in decoded_words:
+                    if (self.isTest == True):
+                        print(seg.word, seg.start_frame, seg.end_frame)
+                    # Current word start time in s.
+                    curr_word_start = math.trunc(seg.start_frame/100)
+                    if curr_win_start <= curr_word_start < curr_win_end:
+                        curr_win_pol_list.append(TextBlob(seg.word).sentiment.polarity)
+                        curr_win_sbj_list.append(TextBlob(seg.word).sentiment.subjectivity)
+                        curr_win_words.append(seg.word)
+                pol_avg = average(curr_win_pol_list)
+                subj_avg = average(curr_win_sbj_list)
+                word_list_to_string = ' '.join(map(str, curr_win_words))
+
+                segment_dict = {
+                                 'word': word_list_to_string,
+                                 'start_time_s': curr_win_start,
+                                 'end_time_s': curr_win_end,
+                                 'subjectivity': subj_avg,
+                                 'polarity': pol_avg,
                                  'url': self.url,
                                  'video_title': video_title
-                             }
-                self.word_list.append(dict(word_dict))
+                               }
+                self.word_list.append(dict(segment_dict))
 
     def getPitchAnalysis(self):
         # VARIABLES SETUP
@@ -268,6 +306,10 @@ class videoObject:
             plt.plot(amplitude_data)
             plt.show()
             
-            
+def average(inputList):
+    avg = 0
+    if len(inputList) != 0:
+        avg = sum(inputList) / len(inputList)
+    return avg
 
 

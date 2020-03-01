@@ -15,7 +15,7 @@ def getEngine(isTest):
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except Exception:
-            engine = create_engine('mysql+pymysql://root@localhost/climactic_test')
+            engine = create_engine('mysql+pymysql://root:root@localhost:8889/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except:
