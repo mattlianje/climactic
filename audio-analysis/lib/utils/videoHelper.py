@@ -112,7 +112,7 @@ class videoObject:
                 # Current window word list.
                 curr_win_words = []
                 # Handling the fencepost case.
-                if curr_win_start > self.getDuration() - self.windowSize:
+                if curr_win_start > (self.getDuration() - self.windowSize):
                     curr_win_end = self.getDuration()
                 for seg in decoded_words:
                     if (self.isTest == True):
