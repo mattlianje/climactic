@@ -73,11 +73,12 @@ print('Starting matching:')
 # dice up the full audio into 4 second intervals
 exec_start = time.time()
 labelledClips = np.array([])
+start_idx = 0
 
 # loop through intervals and check if clip exists in highlight video
 for (start, end) in intervals:
   clip = fullAudioLib[start*sampleRate : end*sampleRate]
-  hasMatch, idx = libHelper.clipExistsInFull(clip, highlightAudioLib)
+  hasMatch, idx = libHelper.clipExistsInFull(clip, highlightAudioLib[start_idx:])
 
   # add labelled clip to array and save occasionally
   labelledClips = np.append(labelledClips, [start, end, hasMatch])
@@ -88,6 +89,8 @@ for (start, end) in intervals:
   startMinute, startSec = divmod(start, 60)
   endMinute, endSec = divmod(end, 60)
   print(hasMatch, idx, "{:}:{:} - {:}:{:}".format(startMinute, startSec, endMinute, endSec))
+  if hasMatch:
+    start_idx = start_idx + (len(clip)//2) - 1
 
 save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
 print("COMPLETE --- %s seconds ---" % (time.time() - exec_start))
