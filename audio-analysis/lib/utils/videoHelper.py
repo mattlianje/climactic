@@ -105,12 +105,8 @@ class videoObject:
                 curr_win_start = i * slide_inc
                 # Current window end time  in s.
                 curr_win_end = (i * slide_inc) + self.windowSize
-                # Current window polarity list.
-                curr_win_pol_list = []
-                # Current window subjectivity list.
-                curr_win_sbj_list = []
-                # Current window word list.
-                curr_win_words = []
+                # Current window lists for word, subjectivity, and polarity
+                curr_win_pol_list, curr_win_sbj_list, curr_win_words = ([] for i in range (3))
                 # Handling the fencepost case.
                 if curr_win_start > (self.getDuration() - self.windowSize):
                     curr_win_end = self.getDuration()
