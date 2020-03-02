@@ -76,7 +76,7 @@ def createTable(table_name, meta, engine):
                     Column('amplitude_peak',Integer),
                     Column('pitch',Float),
                 )
-    elif table_name == 'mfcc_table':
+    elif table_name == 'mfcc_test_table':
         mfcc_table = Table(table_name,meta,
                     Column('mfcc_id',Integer, primary_key=True, autoincrement=True),
                     Column('index',Integer),
