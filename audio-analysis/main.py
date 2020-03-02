@@ -30,7 +30,10 @@ engine = getEngine(TESTING)
 def analyzeVideoSound(url, tag):
     global engine
     global TESTING
-    video = videoHelper.videoObject(url, tag, TESTING)
+    # Size of sliding window in seconds to partition video by.
+    window_size = 4
+    overlap = 2
+    video = videoHelper.videoObject(url, window_size, overlap, tag, TESTING)
     print(video.getFilename())
     video.getAudio()
     video.getTextAnalysis()
