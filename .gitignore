@@ -7,3 +7,8 @@ timestamps.json
 highlights.mp4
 flask-app/secrets.py
 **/__pycache__/**
+**/secrets.py
+audio-matching/audio/**
+audio-matching/librosas/**
+audio-matching/labelled-time-intervals/**
+audio-matching/videos/**
