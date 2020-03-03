@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import youtube_dl
 from os import path
 from pydub import AudioSegment
 import youtube_dl
@@ -15,6 +14,7 @@ import sys
 from aubio import source, pitch
 import numpy as np
 import librosa
+from tqdm import tqdm
 from librosa import display
 
 filepath = 'audio-files/'
@@ -23,7 +23,7 @@ ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
+                'preferredcodec': 'wav',
                 'preferredquality': '192',
             }],
             'outtmpl': 'audio-files/%(title)s-%(id)s.%(ext)s'
@@ -62,7 +62,7 @@ class videoObject:
 
     def getFilename(self):
         video_title = self.info_dict.get('title', None).replace(":", " -")
-        video_filename = filepath + video_title + '-' + self.url.split("=", 1)[1] + '.mp3'
+        video_filename = filepath + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
         return video_filename
 
     def getFilenameWav(self):
@@ -76,63 +76,48 @@ class videoObject:
             # Url of the youtube video - and the audio directory.
             ydl.download([self.url])
 
-        dst = self.getFilenameWav()
-        sound = AudioSegment.from_mp3(self.getFilename())
-        sound.export(dst, format="wav")
+
 
     # Performs text analysis
     def getTextAnalysis(self):
-        dst = self.getFilenameWav()
-        # We can use .wav .aiff or .flac with this lib.
-        AUDIO_FILE = dst
-        # Uses AUDIO-FILE to do a speech to text.
+        if self.overlap > self.windowSize:
+            raise Exception('ERROR - overlap must not exceed windowSize.')
         r = sr.Recognizer()
-        framerate = 0.1
-        with sr.AudioFile(AUDIO_FILE) as source:
-            audio = r.record(source)  # read the entire audio file
-            decoder = r.recognize_sphinx(audio, show_all=True)
-            decoded_words = decoder.seg()
-            video_title = self.info_dict.get('title', None)
-            # Number of seconds to move window forward by at each iteration of this sliding window.
-            slide_inc = self.windowSize - self.overlap
-            if self.overlap > self.windowSize:
-                raise Exception('ERROR - overlap must not exceed windowSize.')
-            num_windows = self.getNumberOfWindows()
-            print(decoder.seg())
+        # We can use .wav .aiff or .flac with this lib.
+        raw_file = self.getFilename()
+        file = sr.AudioFile(raw_file)
+        video_title = self.info_dict.get('title', None)
+        num_windows = self.getNumberOfWindows()
+        slide_inc = self.windowSize - self.overlap
 
-            for i in range(0, num_windows):
-                # Current window start time in s.
-                curr_win_start = i * slide_inc
-                # Current window end time  in s.
-                curr_win_end = (i * slide_inc) + self.windowSize
-                # Current window lists for word, subjectivity, and polarity
-                curr_win_pol_list, curr_win_sbj_list, curr_win_words = ([] for i in range (3))
-                # Handling the fencepost case.
-                if curr_win_start > (self.getDuration() - self.windowSize):
-                    curr_win_end = self.getDuration()
-                for seg in decoded_words:
-                    if (self.isTest == True):
-                        print(seg.word, seg.start_frame, seg.end_frame)
-                    # Current word start time in s.
-                    curr_word_start = math.trunc(seg.start_frame/100)
-                    if curr_win_start <= curr_word_start < curr_win_end:
-                        curr_win_pol_list.append(TextBlob(seg.word).sentiment.polarity)
-                        curr_win_sbj_list.append(TextBlob(seg.word).sentiment.subjectivity)
-                        curr_win_words.append(seg.word)
+        for window in tqdm(range(num_windows)):
+            window_start = window * slide_inc
+            window_end = window_start + self.windowSize
+            with file as source:
+                audio = r.record(source, offset=window_start, duration=self.windowSize)
+                payload = r.recognize_google(audio, show_all=True)
+                # Lists for temp storage of words and their sentiment scores
+                curr_win_pol_list, curr_win_sbj_list, curr_win_words = ([] for i in range(3))
+                if len(payload) != 0:
+                    phrase = payload['alternative'][0]['transcript']
+                    if phrase != None:
+                        for word in phrase.split():
+                            curr_win_pol_list.append(TextBlob(word).sentiment.polarity)
+                            curr_win_sbj_list.append(TextBlob(word).sentiment.subjectivity)
+                            curr_win_words.append(word)
                 pol_avg = average(curr_win_pol_list)
                 subj_avg = average(curr_win_sbj_list)
-                word_list_to_string = ' '.join(map(str, curr_win_words))
 
-                segment_dict = {
-                                 'word': word_list_to_string,
-                                 'start_time_s': curr_win_start,
-                                 'end_time_s': curr_win_end,
-                                 'subjectivity': subj_avg,
-                                 'polarity': pol_avg,
-                                 'url': self.url,
-                                 'video_title': video_title
-                               }
-                self.word_list.append(dict(segment_dict))
+            segment_dict = {
+                'word': phrase,
+                'start_time_s': window_start,
+                'end_time_s': window_end,
+                'subjectivity': subj_avg,
+                'polarity': pol_avg,
+                'url': self.url,
+                'video_title': video_title
+            }
+            self.word_list.append(dict(segment_dict))
 
     def getPitchAnalysis(self):
         # VARIABLES SETUP
