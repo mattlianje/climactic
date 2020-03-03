@@ -47,7 +47,7 @@ def sqlConnectionSetup(engine):
 #Function checks if url exists in table already
 def urlExistsSpecific(url, engine, column_name):
     # Check if URL already exists
-    result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '" AND `pitch` IS NOT NULL')
+    result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '" AND `'+ column_name +'` IS NOT NULL')
     print("Rows for ", column_name, " for this video ", result.rowcount)
 
     # If URL does exist return True

@@ -38,3 +38,4 @@ def updateDBWithDataFromDF(data_list, engine, column_name):
     engine.execute(sql)
     sql = "DROP TABLE `temp_table`"
     engine.execute(sql)
+    

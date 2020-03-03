@@ -10,20 +10,19 @@ os.system('python test.py -v')
 
 # Pass `python main.py log` as optional arg to see print statements
 TESTING = False
-if len(sys.argv) == 2:
-    if sys.argv[1] == 'log':
+if len(sys.argv) == 3:
+    if sys.argv[2] == 'log':
         TESTING = True
 
-
+print("TESTING STATUS:", TESTING)
 engine = getEngine(TESTING)
 
-url = input("Provide YT Link: ")
-tag = input("Provide highlight tag (True/False): ")
+url = sys.argv[1]
 print("Link: ", url)
 window_size = 4
 overlap = 2
 column_name = 'pitch'
-video = videoHelper.videoObject(url, window_size, overlap, tag, TESTING)
+video = videoHelper.videoObject(url, window_size, overlap, TESTING)
 
 #Check if video already exists
 url_exists = urlExistsSpecific(url, engine, column_name)
@@ -32,10 +31,8 @@ if url_exists == True:
 video.getAudio()
 print('Getting Pitch...')
 video.getPitchAnalysis()
-print('Got Pitch')
-print('')
-print('Updating DB for Pitch...')
-print('')
+print('Got Pitch\n')
+print('Updating DB for Pitch...\n')
 dfHelper.updateDBWithDataFromDF(video.pitch_list, engine, column_name)
 print('Done Updating')
     

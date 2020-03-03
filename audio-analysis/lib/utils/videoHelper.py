@@ -32,11 +32,10 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, windowSize, overlap, isHighlight, isTest):
+    def __init__(self, url, windowSize, overlap, isTest):
         self.url = url
         self.windowSize = windowSize
         self.overlap = overlap
-        self.highlight = isHighlight
         self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
@@ -67,7 +66,8 @@ class videoObject:
 
     def getFilenameWav(self):
         video_title = self.info_dict.get('title', None)
-        filename_wav = filepath + 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
+        #filename_wav = filepath + 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
+        filename_wav = 'audio-files/CS -GO - Fnatic vs. mousesports [Inferno] Map 1 - Grand Final - ESL Pro League Season 10 Finals-0AlFcix7aaY.wav'
         return filename_wav
     
     # Downloads mp3 from url and converts to wav
