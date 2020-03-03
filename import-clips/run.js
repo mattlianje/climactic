@@ -2,9 +2,30 @@
 
 const fetchVideoInfo = require('youtube-info');
 const request = require('request');
+var dbConnection = require('./secretsJS')
 
 const args = process.argv.slice(2);
 const youtubeUrl = args[0];
+var TESTING = false;
+if(args[1] == "log"){var TESTING = true;}
+
+var mysql = require('mysql');
+// CONNECT TO DB
+if(TESTING){ // Localhost when testing
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    database: "climactic_test"
+  });
+}else{ // Prod DB
+  var con = mysql.createConnection({
+    host: dbConnection.host,
+    user: dbConnection.username,
+    password: dbConnection.password,
+    database: dbConnection.database
+  });
+}
+// -----------------------------
 
 const getVideoId = (url) => {
   var videoId = null;
@@ -56,18 +77,36 @@ const sendToDB = (rows) => {
   });
 }
 
+const sendtoDBUsingSQL = (rows) => {
+  con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected to localhost");
+    var rowcount = 0;
+    rows.forEach((element, index) => {
+      var sql = "INSERT INTO labelled (`url`, `start`, `end`) VALUES ('"+ element.youtubeUrl +"', '"+ element.start +"', '"+ element.end +"')";
+      con.query(sql, function (err, result) {
+        if (err) throw err;
+      });
+      rowcount += 1;
+    });
+    console.log(rowcount + " records inserted");
+    con.end();
+  });
+}
+
 const OVERLAP_TIME = 2;
 const CLIP_LENGTH = 4; 
 
 if (youtubeUrl) {
+  console.log(youtubeUrl)
   videoId = getVideoId(youtubeUrl);
   fetchVideoInfo(videoId, (err, videoInfo) => {
     if (err) throw new Error(err);
     videoDuration = videoInfo.duration;
     console.log(videoDuration);
     const clipIntervals = getClipIntervals(videoDuration, CLIP_LENGTH, OVERLAP_TIME);
-    newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval))
-    sendToDB(newRows);
+    newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval));
+    sendtoDBUsingSQL(newRows);
   });
 } else {
   console.log(" USAGE: npm start *insert youtube vid url*");

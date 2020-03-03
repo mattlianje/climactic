@@ -38,3 +38,9 @@ def extractLibrosa(audioFilePath, savePath):
     audio, sampleRate = createAndSaveLibrosa(audioFilePath, savePath)
   return (audio, sampleRate)
 
+# extract mfcc and amplitude from a clip
+def getAmpMfcc(clip, sampleRate):
+  mfcc = librosa.feature.mfcc(y=clip, sr=sampleRate, n_mfcc = 40)
+  mfccProcessed = np.mean(mfcc.T,axis=0)
+  amplitude = np.mean(clip)
+  return (mfccProcessed, amplitude)
