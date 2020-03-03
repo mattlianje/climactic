@@ -12,3 +12,4 @@ audio-matching/audio/**
 audio-matching/librosas/**
 audio-matching/labelled-time-intervals/**
 audio-matching/videos/**
+audio-matching/mfccs-amp-intervals/**
