@@ -5,6 +5,20 @@ const request = require('request');
 
 const args = process.argv.slice(2);
 const youtubeUrl = args[0];
+var TESTING = false;
+if(args[1] == "log"){var TESTING = true;}
+
+// CONNECT TO LOCALHOST (optional)
+if(TESTING){
+  var mysql = require('mysql');
+
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    database: "climactic_test"
+  });
+}
+// -----------------------------
 
 const getVideoId = (url) => {
   var videoId = null;
@@ -60,14 +74,29 @@ const OVERLAP_TIME = 2;
 const CLIP_LENGTH = 4; 
 
 if (youtubeUrl) {
+  console.log(youtubeUrl)
   videoId = getVideoId(youtubeUrl);
   fetchVideoInfo(videoId, (err, videoInfo) => {
     if (err) throw new Error(err);
     videoDuration = videoInfo.duration;
     console.log(videoDuration);
     const clipIntervals = getClipIntervals(videoDuration, CLIP_LENGTH, OVERLAP_TIME);
-    newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval))
-    sendToDB(newRows);
+    newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval));
+    if(TESTING){
+      con.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected to localhost");
+        newRows.forEach((element, index) => {
+          var sql = "INSERT INTO labelled (`url`, `start`, `end`) VALUES ('"+ element.youtubeUrl +"', '"+ element.start +"', '"+ element.end +"')";
+          con.query(sql, function (err, result) {
+            if (err) throw err;
+          });
+        });
+        console.log(videoDuration + " records inserted");
+      });
+    } else {
+      sendToDB(newRows);
+    }
   });
 } else {
   console.log(" USAGE: npm start *insert youtube vid url*");

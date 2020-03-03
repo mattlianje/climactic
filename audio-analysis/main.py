@@ -35,10 +35,22 @@ def analyzeVideoSound(url, tag):
     overlap = 2
     video = videoHelper.videoObject(url, window_size, overlap, tag, TESTING)
     print(video.getFilename())
+    print('Getting Audio...')
     video.getAudio()
+    print('Got Audio')
+    print('')
+    print('Getting Text...')
     video.getTextAnalysis()
+    print('Got Text')
+    print('')
+    print('Getting Amp/MFCC...')
     video.getAmpMFCCAnalysis()
+    print('Got Amp/MFCC')
+    print('')
+    print('Getting Pitch...')
     video.getPitchAnalysis()
+    print('Got Pitch')
+    print('')
 
     #    df1              df2                df4                |
     # (time, word)   (time, amplitude)   (time, pitch)          |
