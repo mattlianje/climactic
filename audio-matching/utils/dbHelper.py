@@ -43,12 +43,10 @@ def getIntervals(url):
   return intervals
 
 def batchUpdate(query):
-
   cnx = mysql.connector.connect(**config)
   cursor = cnx.cursor()
 
   cursor.execute(query)
-  
   cnx.commit()
 
   cursor.close()

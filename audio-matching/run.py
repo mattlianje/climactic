@@ -12,9 +12,8 @@ import time
 from sklearn import preprocessing
 
 # USAGE test.py [youtube url to full video] [youtuble url to highlight video]
-option = sys.argv[1]
-fullVidUrl = sys.argv[2]
-highlightUrl = sys.argv[3]
+fullVidUrl = sys.argv[1]
+highlightUrl = sys.argv[2]
 
 # get youtube ids
 fullId = fullVidUrl.replace('https://www.youtube.com/watch?v=', '')
@@ -70,57 +69,28 @@ highlightAudioLib = preprocessing.scale(highlightAudioLib)
 print('Getting intervals')
 intervals = dbHelper.getIntervals(fullVidUrl)
 
-def isHighlight():
-  start_idx = 0
-  labelledClips = np.array([])
-  counter = 0
-
-  for (start, end) in intervals:
-    counter += 1
-    clip = fullAudioLib[start*sampleRate : end*sampleRate]
-    hasMatch, idx = libHelper.clipExistsInFull(clip, highlightAudioLib[start_idx:])
-
-    # shorten highlightAudioLib for faster processing time
-    if hasMatch:
-      start_idx = start_idx + len(clip)//2 - 1
-
-    # add labelled clip to array and save occasionally
-    labelledClips = np.append(labelledClips, [start, end, hasMatch])
-    if len(labelledClips) % 20 == 0:
-      save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
-
-    # print start end time for visual checking
-    startMinute, startSec = divmod(start, 60)
-    endMinute, endSec = divmod(end, 60)
-    print(hasMatch, idx, "{:}:{:} - {:}:{:} completed: {:}/{:}".format(
-      startMinute, startSec, endMinute, endSec, counter, len(intervals)))
-  
-  return labelledClips
-
-
-def getAmpAndMfccs():
-  ampsAndMfccs = np.array([])
-  for (start, end) in intervals:
-    clip = fullAudioLib[start*sampleRate : end*sampleRate]
-    mfccProcessed, amplitude = libHelper.getAmpMfcc(clip, sampleRate)
-    payload = [start, end, amplitude, np.array_str(mfccProcessed)]
-    ampsAndMfccs = np.append(ampsAndMfccs, payload)
-
-  return ampsAndMfccs
-
-# begin timer
+print('Starting matching:')
+# dice up the full audio into 4 second intervals
 exec_start = time.time()
+labelledClips = np.array([])
+start_idx = 0
 
-if option == '--mfcc':
-  print('Processing MFCC and Amplitude')
-  ampsAndMfccs = getAmpAndMfccs()
-  save("mfccs-amp-intervals/{:}.npy".format(fullId), ampsAndMfccs)
-  print(ampsAndMfccs)
+# loop through intervals and check if clip exists in highlight video
+for (start, end) in intervals:
+  clip = fullAudioLib[start*sampleRate : end*sampleRate]
+  hasMatch, idx = libHelper.clipExistsInFull(clip, highlightAudioLib[start_idx:])
 
-if option == '--isHighlight':
-  print('Starting audio matching')
-  labelledClips = isHighlight()
-  save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
-  print(labelledClips)
+  # add labelled clip to array and save occasionally
+  labelledClips = np.append(labelledClips, [start, end, hasMatch])
+  if len(labelledClips) % 20 == 0:
+    save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
 
+  # print start end time for visual checking
+  startMinute, startSec = divmod(start, 60)
+  endMinute, endSec = divmod(end, 60)
+  print(hasMatch, idx, "{:}:{:} - {:}:{:}".format(startMinute, startSec, endMinute, endSec))
+  if hasMatch:
+    start_idx = start_idx + (len(clip)//2) - 1
+
+save("labelled-time-intervals/{:}.npy".format(fullId), labelledClips)
 print("COMPLETE --- %s seconds ---" % (time.time() - exec_start))

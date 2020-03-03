@@ -18,15 +18,12 @@ if not os.path.isfile(mfccPath):
   exit()
 
 # load data
-
 # mfcc and amp data format: [start, end, amplitude, mfcc as string]
 print('loading mfcc, amp data')
 mfccData = load(mfccPath)
 
 rows = len(mfccData) // 4
 mfccData = mfccData.reshape(rows, 4)
-
-# iterate through mfcc amp data and generate query
 
 # convert mfccData to query syntax in the for of (url, start, mfcc, amp)
 def formatUpdatedValues(url, start, end, mfcc, amplitude):
