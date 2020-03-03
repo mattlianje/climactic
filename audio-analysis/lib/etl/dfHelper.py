@@ -31,7 +31,7 @@ def updateDBWithDataFromDF(data_list, engine, column_name):
 
     sql = """
             UPDATE labelled, temp_table 
-            SET labelled.pitch = temp_table.pitch 
+            SET labelled."""+ column_name +""" = temp_table."""+ column_name +"""
             WHERE labelled.url = temp_table.url 
                 AND labelled.start = temp_table.start_time_s;
             """

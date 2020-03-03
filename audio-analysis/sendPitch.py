@@ -3,7 +3,7 @@ import sys
 import os
 import lib.etl.dfHelper as dfHelper
 import lib.utils.videoHelper as videoHelper
-from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, urlExistsSpecific, getEngine
+from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, columnForURLFilled, getEngine
 
 # Run unit tests first
 os.system('python test.py -v')
@@ -25,9 +25,14 @@ column_name = 'pitch'
 video = videoHelper.videoObject(url, window_size, overlap, TESTING)
 
 #Check if video already exists
-url_exists = urlExistsSpecific(url, engine, column_name)
-if url_exists == True:
-    print("This video is already in the database. Will overwrite ", column_name, " data.")
+url_exists = urlExists(url, engine)
+if url_exists == False: 
+    print("This url is not in `labelled` yet:", url)
+    print("Do cd 'import-clips' and run 'npm start", url ,"'")
+    exit()
+#Check if column already filled
+column_filled = columnForURLFilled(url, engine, column_name)
+if column_filled == True: print("This column has already been filled for specific URL. Will overwrite ", column_name, " data.")
 video.getAudio()
 print('Getting Pitch...')
 video.getPitchAnalysis()
