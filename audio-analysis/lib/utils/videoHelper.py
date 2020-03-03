@@ -32,11 +32,10 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, windowSize, overlap, isHighlight, isTest):
+    def __init__(self, url, windowSize, overlap, isTest):
         self.url = url
         self.windowSize = windowSize
         self.overlap = overlap
-        self.highlight = isHighlight
         self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
@@ -190,7 +189,6 @@ class videoObject:
                             'end_time_s': round(endtime),
                             'url': self.url
                             }
-                
                 #Debugging
                 if (self.isTest):
                     print("Interval: ", ic, " FC: ", fc, " C: ", c, "IndexC: ", index_c, "StartTime: ", starttime, "EndTime: ", endtime)
@@ -199,6 +197,9 @@ class videoObject:
                     print("Array Length: ", len(pitch_data), "Begin Array: ", pitch_data[startinterval], "End Array: ", pitch_data[endinterval])
                     print("Pitch: ", interval_avg_p)
                     print()
+                
+                #Append to Video Object Pitch List
+                self.pitch_list.append(dict(pitch_dict))
                     
 
             
@@ -210,9 +211,6 @@ class videoObject:
             hop_c = 0
             c = index_c*fs
             index_c += interval
-
-            #Append to Video Object Pitch List
-            self.pitch_list.append(dict(pitch_dict))
 
         if (self.isTest):
             pitch_data = [d.get('pitch') for d in self.pitch_list]
