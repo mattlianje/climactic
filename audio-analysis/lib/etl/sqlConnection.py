@@ -45,6 +45,14 @@ def sqlConnectionSetup(engine):
     meta.create_all() # Create all tables
 
 #Function checks if url exists in table already
+def urlExistsSpecific(url, engine, column_name):
+    # Check if URL already exists
+    result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '" AND `' + column_name + '` IS NOT NULL')
+    print("Rows for ", column_name, " for this video ", result.rowcount)
+
+    # If URL does exist return True
+    return result.rowcount > 0
+#Function checks if url exists in table already
 def urlExists(url, engine):
     # Check if URL already exists
     result = engine.execute('SELECT * FROM `test_table` WHERE `url`="' + url + '"')

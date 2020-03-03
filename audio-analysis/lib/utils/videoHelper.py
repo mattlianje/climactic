@@ -32,11 +32,10 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, windowSize, overlap, isHighlight, isTest):
+    def __init__(self, url, windowSize, overlap, isTest):
         self.url = url
         self.windowSize = windowSize
         self.overlap = overlap
-        self.highlight = isHighlight
         self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
