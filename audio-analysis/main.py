@@ -16,6 +16,7 @@ if len(sys.argv) == 2:
 
 # Using this Trump Video for testing
 trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
+eddie_bravo = "https://www.youtube.com/watch?v=hC5nKPHAojw&t=499s"
 
 engine = getEngine(TESTING)
 
@@ -123,7 +124,7 @@ def prompt():
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        url_exists = urlExists(trump_video, engine)
+        url_exists = urlExists(eddie_bravo, engine)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:

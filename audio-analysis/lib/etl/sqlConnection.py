@@ -23,7 +23,7 @@ def getEngine(isTest):
             
     else:
         try:
-            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
+            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test3.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except:
@@ -49,7 +49,6 @@ def columnForURLFilled(url, engine, column_name):
     # Check if URL already exists
     result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '" AND `'+ column_name +'` IS NOT NULL')
     print("Rows for ", column_name, " for this video ", result.rowcount)
-
     # If URL does exist return True
     return result.rowcount > 0
 
