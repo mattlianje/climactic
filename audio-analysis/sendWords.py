@@ -47,5 +47,5 @@ print('Got text analysis\n')
 print('Updating DB for text analysis...\n')
 text_columns = ['word', 'subjectivity', 'polarity']
 for column in text_columns:
-    dfHelper.updateDBWithDataFromDF(video.pitch_list, engine, column)
+    dfHelper.updateDBWithDataFromDF(video.word_list, engine, column)
 print('Done Updating')
