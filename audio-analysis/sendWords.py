@@ -8,8 +8,10 @@ from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, columnForURLFil
 
 # Run unit tests first
 os.system('python test.py -v')
+trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
 
 # Pass `python main.py log` as optional arg to see print statements
+# Example input: $ python sendWords.py "https://www.youtube.com/watch?v=hC5nKPHAojw" log
 TESTING = False
 url = sys.argv[1]
 if len(sys.argv) == 3:
@@ -18,7 +20,12 @@ if len(sys.argv) == 3:
     if validators.url(sys.argv[1]):
         url = sys.argv[1]
 if len(sys.argv) == 2:
-    url = sys.argv[1]
+    url = trump_video
+    if validators.url(sys.argv[1]):
+        url = sys.argv[1]
+    if sys.argv[1] == 'log':
+        TESTING = True
+
 
 print("TESTING STATUS:", TESTING)
 engine = getEngine(TESTING)
