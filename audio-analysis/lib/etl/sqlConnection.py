@@ -23,7 +23,7 @@ def getEngine(isTest):
             
     else:
         try:
-            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
+            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test3.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except:
