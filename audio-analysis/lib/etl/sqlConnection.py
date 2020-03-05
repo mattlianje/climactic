@@ -98,8 +98,8 @@ def createTable(table_name, meta, engine):
         print('ERROR: There is not setup for table "', table_name, '". Please create its setup.')
 
 
-def getTableAsDf(table_name):
-    engine = getEngine(False)
+def getTableAsDf(table_name, engine):
+    engine = engine
     metadata = db.MetaData()
     table_obj = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     query = db.select([table_obj])

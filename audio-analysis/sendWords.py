@@ -27,7 +27,7 @@ if len(sys.argv) == 2:
         TESTING = True
 
 
-print("TESTING STATUS:", TESTING)
+print("IS TEST:", TESTING)
 engine = getEngine(TESTING)
 
 print("Link: ", url)

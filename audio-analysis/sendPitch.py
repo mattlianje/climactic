@@ -14,7 +14,7 @@ if len(sys.argv) == 3:
     if sys.argv[2] == 'log':
         TESTING = True
 
-print("TESTING STATUS:", TESTING)
+print("IS TEST:", TESTING)
 engine = getEngine(TESTING)
 
 url = sys.argv[1]
