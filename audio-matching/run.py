@@ -24,42 +24,59 @@ if not dbHelper.urlExists(fullVidUrl):
   print('youtube url does not exist')
   exit()
 
-# Download both videos
-print("Downloading videos")
-YouTube(fullVidUrl).streams[0].download("videos/", "full_video")
-YouTube(highlightUrl).streams[0].download("videos/", "highlight_video")
+def downloadVid(vidUrl, vidId):
+  videoPath = "videos/{:}.mp4".format(vidId)
+  if not os.path.isfile(videoPath):
+    print("Downloading ", vidUrl)
+    YouTube(vidUrl).streams[0].download("videos/", vidId)
+  else:
+    print(vidUrl, " already downloaded")
 
-# Extract audio
-fullVideoPath = "videos/full_video.mp4"
-highlightVideoPath = "videos/highlight_video.mp4"
+def writeAudio(videoPath, audioPath):
+  if not os.path.isfile(audioPath):
+    video = VideoFileClip(videoPath)
+    audio = video.audio
+    print("saving: ", audioPath)
+    audio.write_audiofile(audioPath)
 
-fullVideo = VideoFileClip(fullVideoPath)
-fullVideoAudio = fullVideo.audio
-fullDuration = fullVideo.duration
+# preprocess to get librosa of full video
+fullVideoPath = "videos/{:}.mp4".format(fullId)
+fullAudioPath = "audio/{:}.mp3".format(fullId)
+fullLibPath = "librosas/{:}.npy".format(fullId)
 
-highlightVideo = VideoFileClip(highlightVideoPath)
-highlightVideoAudio = highlightVideo.audio
-highlightDuration = highlightVideoAudio.duration
+# if librosa already exists dont download video
+if os.path.isfile(fullLibPath):
+  fullAudioLib, sampleRate = libHelper.retrieveLibrosa(fullLibPath)
 
-# write audio to file if audio doesn't already exist
-fullAudioPath = "audio/{:}_full_audio.mp3".format(fullId)
-highlightAudioPath = "audio/{:}_highlight_audio.mp3".format(highlightId)
+else:
+  # download video
+  downloadVid(fullVidUrl, fullId)
 
-if not os.path.isfile(fullAudioPath):
-  print("saving: ", fullAudioPath)
-  fullVideoAudio.write_audiofile(fullAudioPath)
+  # write audio
+  writeAudio(fullVideoPath, fullAudioPath)
 
-if not os.path.isfile(highlightAudioPath):
-  print("saving: ", highlightAudioPath)
-  highlightVideoAudio.write_audiofile(highlightAudioPath)
+  # get librosa
+  fullAudioLib, sampleRate = libHelper.extractLibrosa(fullAudioPath, fullLibPath)
 
-# convert audio to librosa and save
-print("converting audio to librosa")
-fullLibPath = "librosas/{:}_full.npy".format(fullId)
-highlightLibPath = "librosas/{:}_highlight.npy".format(highlightId)
 
-fullAudioLib, sampleRate = libHelper.extractLibrosa(fullAudioPath, fullLibPath)
-highlightAudioLib, sampleRate = libHelper.extractLibrosa(highlightAudioPath, highlightLibPath)
+# preprocess to get librosa of highlight video
+highlightVideoPath = "videos/{:}.mp4".format(highlightId)
+highlightAudioPath = "audio/{:}.mp3".format(highlightId)
+highlightLibPath = "librosas/{:}.npy".format(highlightId)
+
+# if librosa already exists dont download video
+if os.path.isfile(highlightLibPath):
+  highlightAudioLib, sampleRate = libHelper.retrieveLibrosa(highlightLibPath)
+
+else:
+  # download video
+  downloadVid(highlightUrl, highlightId)
+
+  # write audio
+  writeAudio(highlightVideoPath, highlightAudioPath)
+
+  # get librosa
+  highlightAudioLib, sampleRate = libHelper.extractLibrosa(highlightAudioPath, highlightLibPath)
 
 # normalize both libs
 fullAudioLib = preprocessing.scale(fullAudioLib)

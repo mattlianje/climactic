@@ -13,3 +13,7 @@ audio-matching/librosas/**
 audio-matching/labelled-time-intervals/**
 audio-matching/videos/**
 audio-matching/mfccs-amp-intervals/**
+**/__pycache__/**
+**.pyc
+audio-analysis/audio-files/**
+import-clips/secretsJS.js

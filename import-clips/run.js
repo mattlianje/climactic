@@ -58,38 +58,23 @@ const getClipIntervals = (totalLength, clipLength, overlapLength) => {
   return intervals;
 }
 
-const formatRow = ( youtubeUrl, interval)  => {
-  return {
-    youtubeUrl,
-    start: interval[0],
-    end: interval[1]
-  }
+const formatRow = (youtubeUrl, start, end) => {
+  return `('${ youtubeUrl }', ${ start }, ${ end })`;
 }
 
-const sendToDB = (rows) => {
-  request.post('http://data-labelling-fydp.herokuapp.com/addClips', {
-    json: {
-      items: rows
-    }
-  }, (err, res, body) => {
-    if (err) { return console.log(err); }
-    console.log(body);
-  });
+const formatQueryString = (youtubeUrl, intervals) => {
+  values = intervals.map( interval => formatRow(youtubeUrl, interval[0], interval[1]));
+  query = `INSERT INTO labelled (url, start, end) VALUES ${values.join(", ")};`;
+  return query
 }
 
-const sendtoDBUsingSQL = (rows) => {
+const sendtoDBUsingSQL = (sql) => {
   con.connect(function(err) {
     if (err) throw err;
-    console.log("Connected to localhost");
-    var rowcount = 0;
-    rows.forEach((element, index) => {
-      var sql = "INSERT INTO labelled (`url`, `start`, `end`) VALUES ('"+ element.youtubeUrl +"', '"+ element.start +"', '"+ element.end +"')";
-      con.query(sql, function (err, result) {
-        if (err) throw err;
-      });
-      rowcount += 1;
+    console.log("Connected to db");
+    con.query(sql, function (err, result) {
+      if (err) throw err;
     });
-    console.log(rowcount + " records inserted");
     con.end();
   });
 }
@@ -105,8 +90,9 @@ if (youtubeUrl) {
     videoDuration = videoInfo.duration;
     console.log(videoDuration);
     const clipIntervals = getClipIntervals(videoDuration, CLIP_LENGTH, OVERLAP_TIME);
-    newRows = clipIntervals.map( interval => formatRow(youtubeUrl, interval));
-    sendtoDBUsingSQL(newRows);
+    query = formatQueryString(youtubeUrl, clipIntervals);
+    sendtoDBUsingSQL(query);
+    console.log(`${ clipIntervals.length } inserted into db`);
   });
 } else {
   console.log(" USAGE: npm start *insert youtube vid url*");
