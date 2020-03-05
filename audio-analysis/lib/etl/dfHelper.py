@@ -39,3 +39,9 @@ def updateDBWithDataFromDF(data_list, engine, column_name):
     sql = "DROP TABLE `temp_table`"
     engine.execute(sql)
     
+def getStartEndTimes(url, engine):
+    sql = """SELECT `start`,`end`FROM `labelled` WHERE url='"""+ url +"""'"""
+    
+    start_end_df = pd.read_sql_query(sql, engine)
+
+    return start_end_df

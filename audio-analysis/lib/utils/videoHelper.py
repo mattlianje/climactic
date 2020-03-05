@@ -118,18 +118,17 @@ class videoObject:
             }
             self.word_list.append(dict(segment_dict))
 
-    def getPitchAnalysis(self):
+    def getPitchAnalysis(self, start_end_df):
         # VARIABLES SETUP
         fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count
         pitch_sum, co_sum = 0, 0 #pitch sum, confidence sum, maximum pitch, and minimum pitch
         win_s = 4096 # fft size
         hop_s = 512 # hop size
-        fs, audio_data = wavfile.read(self.getFilenameWav()) # Get Frame Rate and audio data
+        fs, audio_data = wavfile.read(self.getFilename()) # Get Frame Rate and audio data
         nf = len(audio_data) # Number of frames
         duration = round((nf / fs), 0) #Duration of video in seconds
         interval = 4 # Interval in seconds
-        interval_overlap = 2 # Interval overlap in seconds
-        source_file = source(self.getFilenameWav(), fs, hop_s)
+        source_file = source(self.getFilename(), fs, hop_s)
         print("\n", source_file, "\n")
         fs = source_file.samplerate
         tolerance = 0.8
@@ -137,10 +136,10 @@ class videoObject:
         pitch_o.set_unit("midi")
         pitch_o.set_tolerance(tolerance)
         pitch_data = []
-        confidence_data = []
         hop_c = 0 # Hop Counter
         index_c = interval # Index Counter
-        
+        print('FS: ', fs)
+        print('Getting Pitch For each hop..')
         while c <= nf:
             while fc <= interval*fs:
                 samples, read = source_file()
@@ -148,56 +147,53 @@ class videoObject:
                 pitch_data += [frame_pitch]
                 fc += read
                 c += read
-                hop_c += 1
 
                 if read < hop_s: break
-            
-            for interval_bucket in range(2):
-                endtime = c/fs
-                if interval_bucket == 0:
-                    if ic == 1: continue
-                    if round(endtime)%interval != 0: endtime = ic*interval
-                    endtime = endtime - interval_overlap #Endtime = Counter / FrameRate
-                starttime = endtime - interval
-                if interval_bucket == 1:
-                    if round(endtime)%interval != 0: starttime = (ic-1)*interval
-                if endtime > c/fs: endtime = c/fs
-                # Calculate average frequency in interval
-                startinterval = round((starttime*fs)/hop_s)
-                endinterval = round((endtime*fs)/hop_s)-1
-                for _p in pitch_data[startinterval:endinterval]:
-                    pitch_sum += _p    
-                interval_avg_p = pitch_sum / hop_c
-                pitch_dict = {
-                            'pitch': interval_avg_p,
-                            'start_time_s': round(starttime),
-                            'end_time_s': round(endtime),
-                            'url': self.url
-                            }
-                #Debugging
-                if (self.isTest):
-                    print("Interval: ", ic, " FC: ", fc, " C: ", c, "IndexC: ", index_c, "StartTime: ", starttime, "EndTime: ", endtime)
-                    print("Interval Bucket: ", interval_bucket, "Start Interval:", startinterval, "End Interval:", endinterval)
-                    print("Pitch Sum: ", pitch_sum)
-                    print("Array Length: ", len(pitch_data), "Begin Array: ", pitch_data[startinterval], "End Array: ", pitch_data[endinterval])
-                    print("Pitch: ", interval_avg_p)
-                    print()
-                
-                #Append to Video Object Pitch List
-                self.pitch_list.append(dict(pitch_dict))
-                    
-
-            
 
             # Reset all counters and variables
             fc = 0
             ic += 1
-            pitch_sum = 0
-            hop_c = 0
             c = index_c*fs
-            index_c += interval
+            index_c += interval  
+
+        i = 0
+        while i < len(start_end_df.index):
+            starttime = start_end_df.loc[i, 'start']
+            endtime = start_end_df.loc[i, 'end']
+            # Calculate average frequency in interval
+            startinterval = math.trunc(round((starttime*fs)/hop_s))
+            endinterval = math.trunc(round((endtime*fs)/hop_s))
+            if endinterval > len(pitch_data)-1: endinterval = len(pitch_data)-1
+            hop_c = endinterval - startinterval
+            for _p in pitch_data[startinterval:endinterval]:
+                pitch_sum += _p
+
+            interval_avg_p = pitch_sum / hop_c
+            pitch_dict = {
+                        'pitch': interval_avg_p,
+                        'start_time_s': round(starttime),
+                        'end_time_s': round(endtime),
+                        'url': self.url
+                        }
+            #Debugging
+            if (self.isTest):
+                print("Interval: ", i+1, " FC: ", fc, " C: ", c, "IndexC: ", index_c, "HopC: ", hop_c, "StartTime: ", starttime, "EndTime: ", endtime)
+                print("Start Interval:", startinterval, "End Interval:", endinterval)
+                print("Pitch Sum: ", pitch_sum)
+                print("Array Length: ", len(pitch_data), "Begin Array: ", pitch_data[startinterval], "End Array: ", pitch_data[endinterval])
+                print("Pitch: ", interval_avg_p)
+                print()
+            
+            #Append to Video Object Pitch List
+            self.pitch_list.append(dict(pitch_dict))
+
+            #Increment and Reset Variables
+            i+=1
+            pitch_sum=0
+        
 
         if (self.isTest):
+            print("C Total: ", c)
             pitch_data = [d.get('pitch') for d in self.pitch_list]
             plt.plot(pitch_data)
             plt.show()
