@@ -7,6 +7,7 @@ import lib.etl.dfHelper as dfHelper
 import lib.utils.videoHelper as videoHelper
 from lib.etl.sqlConnection import sqlConnectionSetup, urlExists, columnForURLFilled, getEngine, getTableAsDf
 from scipy.signal import find_peaks
+import plotly.graph_objects as go
 from scipy.signal import argrelextrema
 import numpy as np
 
@@ -38,7 +39,7 @@ else:
         temp_df = clean_labelled_df[clean_labelled_df['url'] == url].sort_values(by='start_time_s', ascending=True)
         # indices <- list of time stamps of amplitude peaks
         time_series = temp_df['amplitude']
-        indices = find_peaks(time_series, plateau_size=1)[0]
+        indices = find_peaks(time_series, distance=30, )[0]
         for index, row in temp_df.iterrows():
             if row['start_time_s'] not in indices:
                 temp_df.at[index, 'is_amplitude_peak'] = False
@@ -46,3 +47,24 @@ else:
                 temp_df.at[index, 'is_amplitude_peak'] = True
         dfHelper.updateDBWithDataFromDF(temp_df, engine, column_name)
     print('Done!')
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    y=time_series,
+    mode='lines+markers',
+    name='Original Plot'
+))
+
+fig.add_trace(go.Scatter(
+    x=indices,
+    y=[time_series[j] for j in indices],
+    mode='markers',
+    marker=dict(
+        size=8,
+        color='red',
+        symbol='cross'
+    ),
+    name='Detected Peaks'
+))
+
+fig.show()
