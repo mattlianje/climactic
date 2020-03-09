@@ -21,16 +21,16 @@ fullId = fullVidUrl.replace('https://www.youtube.com/watch?v=', '')
 
 # Download both videos
 print("Downloading videos")
-YouTube(fullVidUrl).streams[0].download("videos/", "full_video")
+YouTube(fullVidUrl).streams[0].download("videos/", fullId)
 
 # Extract audio
-fullVideoPath = "videos/full_video.mp4"
+fullVideoPath = "videos/{:}.mp4".format(fullId)
 
 fullVideo = VideoFileClip(fullVideoPath)
 fullVideoAudio = fullVideo.audio
 
 # write audio to file if audio doesn't already exist
-fullAudioPath = "audio/{:}_full_audio.mp3".format(fullId)
+fullAudioPath = "audio/{:}.mp3".format(fullId)
 
 if not os.path.isfile(fullAudioPath):
   print("saving: ", fullAudioPath)
@@ -38,7 +38,7 @@ if not os.path.isfile(fullAudioPath):
 
 # convert audio to librosa and save
 print("converting audio to librosa")
-fullLibPath = "librosas/{:}_full.npy".format(fullId)
+fullLibPath = "librosas/{:}.npy".format(fullId)
 
 fullAudioLib, sampleRate = libHelper.extractLibrosa(fullAudioPath, fullLibPath)
 
