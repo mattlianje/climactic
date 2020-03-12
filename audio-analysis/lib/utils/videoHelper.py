@@ -97,6 +97,8 @@ class videoObject:
                 payload = r.recognize_google(audio, show_all=True)
                 # Lists for temp storage of words and their sentiment scores
                 curr_win_pol_list, curr_win_sbj_list, curr_win_words = ([] for i in range(3))
+                # Initialize phrase to null ... 'silent' speech
+                phrase = None
                 if len(payload) != 0:
                     phrase = payload['alternative'][0]['transcript']
                     if phrase != None:
