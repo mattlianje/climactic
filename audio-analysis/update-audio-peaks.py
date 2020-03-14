@@ -30,7 +30,7 @@ clean_labelled_df = labelled_df.rename(columns={'start': 'start_time_s'})
 # Get the list of urls for which amplitude is NOT NULL and is_amplitude_peak is NULL.
 filtered_labelledDF = labelled_df[(labelled_df['amplitude'].notnull()) & (labelled_df['is_amplitude_peak'].isnull())]
 url_list = filtered_labelledDF.url.unique()
-if not url_list:
+if len(url_list) == 0:
     print('All videos already have amplitude peak tags!')
 else:
     print('Going through videos with is_amplitude_peak tag ...')
