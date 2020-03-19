@@ -24,3 +24,25 @@ def customLeftJoin(dfLeft, dfRight, joinCondition):
             joinedDf.at[index, 'amplitude_peak'] = True
 
     return joinedDf
+
+def updateDBWithDataFromDF(data_list, engine, column_name):
+    df = pd.DataFrame(data_list)
+    df.to_sql('temp_table', engine, if_exists='replace')
+
+    sql = """
+            UPDATE labelled, temp_table 
+            SET labelled."""+ column_name +""" = temp_table."""+ column_name +"""
+            WHERE labelled.url = temp_table.url 
+                AND labelled.start = temp_table.start_time_s;
+            """
+    engine.execute(sql)
+    sql = "DROP TABLE `temp_table`"
+    engine.execute(sql)
+
+def getStartEndTimes(url, engine):
+    sql = """SELECT `start`,`end`FROM `labelled` WHERE url='"""+ url +"""'"""
+    
+    start_end_df = pd.read_sql_query(sql, engine)
+
+    return start_end_df
+

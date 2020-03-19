@@ -25,7 +25,7 @@ mysql.init_app(app)
 def retrieveUnlabelledClips(count):
   query = """ SELECT url, start, end FROM labelled
               WHERE completed = FALSE
-              ORDER BY RAND()
+              ORDER BY priority ASC, RAND()
               LIMIT {:} """.format(count)
   try:
     # connect to db 

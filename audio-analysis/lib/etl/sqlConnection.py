@@ -11,11 +11,11 @@ import pandas as pd
 def getEngine(isTest):
     if isTest:
         try:
-            engine = create_engine('mysql+pymysql://root:root@localhost/climactic_test')
+            engine = create_engine('mysql+pymysql://root@localhost/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except Exception:
-            engine = create_engine('mysql+pymysql://root@localhost/climactic_test')
+            engine = create_engine('mysql+pymysql://root:root@localhost:8889/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except:
@@ -23,7 +23,7 @@ def getEngine(isTest):
             
     else:
         try:
-            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
+            engine = create_engine('mysql+pymysql://' + db_username + ':' + db_password + '@climactic-test3.cmikkru8vljn.us-east-1.rds.amazonaws.com:3306/climactic_test')
             engine.connect()
             print("\nYou are connected to ", engine, "\n")
         except:
@@ -45,10 +45,18 @@ def sqlConnectionSetup(engine):
     meta.create_all() # Create all tables
 
 #Function checks if url exists in table already
+def columnForURLFilled(url, engine, column_name):
+    # Check if URL already exists
+    result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '" AND `'+ column_name +'` IS NOT NULL')
+    print("Rows for ", column_name, " for this video ", result.rowcount)
+    # If URL does exist return True
+    return result.rowcount > 0
+
+#Function checks if url exists in table already
 def urlExists(url, engine):
     # Check if URL already exists
-    result = engine.execute('SELECT * FROM `test_table` WHERE `url`="' + url + '"')
-    print("Number of rows in database for this video", result.rowcount)
+    result = engine.execute('SELECT * FROM `labelled` WHERE `url`="' + url + '"')
+    print("Number of rows in database for this video ", result.rowcount)
 
     # If URL does exist return True
     return result.rowcount > 0
@@ -75,7 +83,6 @@ def createTable(table_name, meta, engine):
                     Column('amplitude',Float),
                     Column('amplitude_peak',Integer),
                     Column('pitch',Float),
-                    Column('p_confidence',Float),
                 )
     elif table_name == 'mfcc_test_table':
         mfcc_table = Table(table_name,meta,
@@ -91,8 +98,8 @@ def createTable(table_name, meta, engine):
         print('ERROR: There is not setup for table "', table_name, '". Please create its setup.')
 
 
-def getTableAsDf(table_name):
-    engine = getEngine(False)
+def getTableAsDf(table_name, engine):
+    engine = engine
     metadata = db.MetaData()
     table_obj = db.Table(table_name, metadata, autoload=True, autoload_with=engine)
     query = db.select([table_obj])

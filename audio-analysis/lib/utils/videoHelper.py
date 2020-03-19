@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import youtube_dl
 from os import path
 from pydub import AudioSegment
 import youtube_dl
@@ -15,6 +14,7 @@ import sys
 from aubio import source, pitch
 import numpy as np
 import librosa
+from tqdm import tqdm
 from librosa import display
 
 filepath = 'audio-files/'
@@ -23,7 +23,7 @@ ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
+                'preferredcodec': 'wav',
                 'preferredquality': '192',
             }],
             'outtmpl': 'audio-files/%(title)s-%(id)s.%(ext)s'
@@ -32,9 +32,10 @@ ydl_opts = {
 # TESTING = False
 
 class videoObject:
-    def __init__(self, url, isHighlight, isTest):
+    def __init__(self, url, windowSize, overlap, isTest):
         self.url = url
-        self.highlight = isHighlight
+        self.windowSize = windowSize
+        self.overlap = overlap
         self.isTest = isTest
         self.word_list = []
         self.amplitude_list = []
@@ -43,6 +44,16 @@ class videoObject:
 
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             self.info_dict = ydl.extract_info(self.url, download=False)
+            # video_title = self.info_dict.get('title', None)
+
+    # Returns the video duration in seconds.
+    def getDuration(self):
+        video_title = self.info_dict.get('duration', None)
+        return video_title
+
+    def getNumberOfWindows(self):
+        num_windows = self.getDuration() // (self.windowSize - self.overlap)
+        return num_windows
 
     def getTitle(self):
         video_title = self.info_dict.get('title', None)
@@ -50,71 +61,76 @@ class videoObject:
 
     def getFilename(self):
         video_title = self.info_dict.get('title', None).replace(":", " -")
-        video_filename = filepath + video_title + '-' + self.url.split("=", 1)[1] + '.mp3'
+        video_filename = filepath + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
         return video_filename
 
     def getFilenameWav(self):
         video_title = self.info_dict.get('title', None)
         filename_wav = filepath + 'WAV-' + video_title + '-' + self.url.split("=", 1)[1] + '.wav'
         return filename_wav
-
+    
     # Downloads mp3 from url and converts to wav
     def getAudio(self):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            # Url of the youtube video - and the audio for that video will be downloaded as an mp3 in the current directory.
+            # Url of the youtube video - and the audio directory.
             ydl.download([self.url])
 
-        dst = self.getFilenameWav()
-        sound = AudioSegment.from_mp3(self.getFilename())
-        sound.export(dst, format="wav")
+
 
     # Performs text analysis
     def getTextAnalysis(self):
-        dst = self.getFilenameWav()
-        # We can use .wav .aiff or .flac with this lib.
-        AUDIO_FILE = dst
-        # Uses AUDIO-FILE to do a speech to text.
+        if self.overlap > self.windowSize:
+            raise Exception('ERROR - overlap must not exceed windowSize.')
         r = sr.Recognizer()
-        framerate = 0.1
-        with sr.AudioFile(AUDIO_FILE) as source:
-            audio = r.record(source)  # read the entire audio file
-            decoder = r.recognize_sphinx(audio, show_all=True)
-            print(decoder.seg())
+        # We can use .wav .aiff or .flac with this lib.
+        raw_file = self.getFilename()
+        file = sr.AudioFile(raw_file)
+        video_title = self.info_dict.get('title', None)
+        num_windows = self.getNumberOfWindows()
+        slide_inc = self.windowSize - self.overlap
 
-            # Prints out all the words and their start and end timestamps.
-            for seg in decoder.seg():
-                if (self.isTest == True):
-                    print(seg.word, seg.start_frame, seg.end_frame)
-                video_title = self.info_dict.get('title', None)
-                word_dict = {
-                                 'word': seg.word,
-                                 'start_time_s': math.trunc(seg.start_frame/100),
-                                 'end_time_s': math.trunc(seg.end_frame/100),
-                                 'subjectivity': TextBlob(seg.word).sentiment.subjectivity,
-                                 'polarity': TextBlob(seg.word).sentiment.polarity,
-                                 'url': self.url,
-                                 'video_title': video_title
-                             }
-                self.word_list.append(dict(word_dict))
+        for window in tqdm(range(num_windows)):
+            window_start = window * slide_inc
+            window_end = window_start + self.windowSize
+            with file as source:
+                audio = r.record(source, offset=window_start, duration=self.windowSize)
+                payload = r.recognize_google(audio, show_all=True)
+                # Lists for temp storage of words and their sentiment scores
+                curr_win_pol_list, curr_win_sbj_list, curr_win_words = ([] for i in range(3))
+                # Initialize phrase to null ... 'silent' speech
+                phrase = None
+                if len(payload) != 0:
+                    phrase = payload['alternative'][0]['transcript']
+                    if phrase != None:
+                        for word in phrase.split():
+                            curr_win_pol_list.append(TextBlob(word).sentiment.polarity)
+                            curr_win_sbj_list.append(TextBlob(word).sentiment.subjectivity)
+                            curr_win_words.append(word)
+                pol_avg = average(curr_win_pol_list)
+                subj_avg = average(curr_win_sbj_list)
 
-    def getPitchAnalysis(self):
+            segment_dict = {
+                'word': phrase,
+                'start_time_s': window_start,
+                'end_time_s': window_end,
+                'subjectivity': subj_avg,
+                'polarity': pol_avg,
+                'url': self.url,
+                'video_title': video_title
+            }
+            self.word_list.append(dict(segment_dict))
+
+    def getPitchAnalysis(self, start_end_df):
         # VARIABLES SETUP
         fc, ic, c = 1, 1, 1 # frame counter (resets every interval), interval counter, continuous frame count
         pitch_sum, co_sum = 0, 0 #pitch sum, confidence sum, maximum pitch, and minimum pitch
         win_s = 4096 # fft size
         hop_s = 512 # hop size
-        fs, audio_data = wavfile.read(self.getFilenameWav()) # Get Frame Rate and audio data
+        fs, audio_data = wavfile.read(self.getFilename()) # Get Frame Rate and audio data
         nf = len(audio_data) # Number of frames
         duration = round((nf / fs), 0) #Duration of video in seconds
-        
-        if duration <= 600:
-            interval = 1
-        elif duration <= 3600:
-            interval = 5
-        else:
-            interval = 10
-
-        source_file = source(self.getFilenameWav(), fs, hop_s)
+        interval = 4 # Interval in seconds
+        source_file = source(self.getFilename(), fs, hop_s)
         print("\n", source_file, "\n")
         fs = source_file.samplerate
         tolerance = 0.8
@@ -122,58 +138,66 @@ class videoObject:
         pitch_o.set_unit("midi")
         pitch_o.set_tolerance(tolerance)
         pitch_data = []
-        confidence_data = []
         hop_c = 0 # Hop Counter
-        index_c = 1 # Index Counter
-        
+        index_c = interval # Index Counter
+        print('FS: ', fs)
+        print('Getting Pitch For each hop..')
         while c <= nf:
             while fc <= interval*fs:
                 samples, read = source_file()
                 frame_pitch = pitch_o(samples)[0]
                 pitch_data += [frame_pitch]
-                pitch_sum += frame_pitch # Using this sum to average out over interval
-                confidence = pitch_o.get_confidence()
-                confidence_data += [confidence]
-                co_sum += confidence
-
                 fc += read
                 c += read
-                hop_c += 1
 
                 if read < hop_s: break
-            
-            # Calculate average frequency in interval
-            interval_avg_p = pitch_sum / hop_c
-            interval_avg_c = co_sum / hop_c
-
-            
-            endtime = c/fs #Endtime = Counter / FrameRate
-            pitch_dict = {
-                                'pitch': interval_avg_p,
-                                'p_confidence': interval_avg_c,
-                                'start_time_s': round(endtime - (fc/fs)),
-                                'end_time_s': round(endtime),
-                                'url': self.url
-                            }
-
-            #Debugging
-            if (self.isTest):
-                print("Pitch: ", interval_avg_p, " P_Confidence: ", interval_avg_c)
 
             # Reset all counters and variables
             fc = 0
             ic += 1
-            pitch_sum = 0
-            hop_c = 0
             c = index_c*fs
-            index_c += 1
+            index_c += interval  
 
+        i = 0
+        while i < len(start_end_df.index):
+            starttime = start_end_df.loc[i, 'start']
+            endtime = start_end_df.loc[i, 'end']
+            # Calculate average frequency in interval
+            startinterval = math.trunc(round((starttime*fs)/hop_s))
+            endinterval = math.trunc(round((endtime*fs)/hop_s))
+            if endinterval > len(pitch_data)-1: endinterval = len(pitch_data)-1
+            hop_c = endinterval - startinterval
+            for _p in pitch_data[startinterval:endinterval]:
+                pitch_sum += _p
+
+            interval_avg_p = pitch_sum / hop_c
+            pitch_dict = {
+                        'pitch': interval_avg_p,
+                        'start_time_s': round(starttime),
+                        'end_time_s': round(endtime),
+                        'url': self.url
+                        }
+            #Debugging
+            if (self.isTest):
+                print("Interval: ", i+1, " FC: ", fc, " C: ", c, "IndexC: ", index_c, "HopC: ", hop_c, "StartTime: ", starttime, "EndTime: ", endtime)
+                print("Start Interval:", startinterval, "End Interval:", endinterval)
+                print("Pitch Sum: ", pitch_sum)
+                print("Array Length: ", len(pitch_data), "Begin Array: ", pitch_data[startinterval], "End Array: ", pitch_data[endinterval])
+                print("Pitch: ", interval_avg_p)
+                print()
+            
             #Append to Video Object Pitch List
             self.pitch_list.append(dict(pitch_dict))
 
+            #Increment and Reset Variables
+            i+=1
+            pitch_sum=0
+        
+
         if (self.isTest):
-            amplitude_data = [d.get('amplitude') for d in self.amplitude_list]
-            plt.plot(amplitude_data)
+            print("C Total: ", c)
+            pitch_data = [d.get('pitch') for d in self.pitch_list]
+            plt.plot(pitch_data)
             plt.show()
 
 
@@ -194,12 +218,8 @@ class videoObject:
             fs, audio_data = wavfile.read(self.getFilenameWav())  
         nf = len(audio_data) # Number of frames
         duration = round((nf / fs), 0) #Duration in secodns
-        if duration <= 600:
-            interval = 1
-        elif duration <= 3600:
-            interval = 5
-        else:
-            interval = 10
+        interval = 4 # Interval in seconds
+        interval_overlap = 2 # Interval overlap in seconds
         ic, c, fc, cs = 1, 1, 1, 1 # interval counter, continuous frame counter, frame counter (resets every interval)
         
         ######## Declaration of Audio Info ########
@@ -249,12 +269,13 @@ class videoObject:
 
                 # Debugging - Printing out values
                 if(self.isTest):
-                    print("Interval: ", ic, " FC: ", fc, " C: ", c, " CS: ", cs,)
+                    print("Interval: ", ic, " FC: ", fc, " C: ", c, " CS: ", cs, "StartTime: ", start_time, "EndTime: ", end_time)
                     print("Audio: ", interval_amp_avg, "MFCC(1): ", mfccs_processed[0])
 
                 # Reset all counters
                 fc = 0
                 ic += 1
+                if c < nf-1: c = c - (interval_overlap*fs)
                 cs = c + 1
                     
             # Increment through Audio    
@@ -268,6 +289,10 @@ class videoObject:
             plt.plot(amplitude_data)
             plt.show()
             
-            
+def average(inputList):
+    avg = 0
+    if len(inputList) != 0:
+        avg = sum(inputList) / len(inputList)
+    return avg
 
 

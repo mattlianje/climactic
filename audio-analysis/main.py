@@ -16,6 +16,7 @@ if len(sys.argv) == 2:
 
 # Using this Trump Video for testing
 trump_video = "https://www.youtube.com/watch?v=JZRXESV3R74"
+eddie_bravo = "https://www.youtube.com/watch?v=hC5nKPHAojw&t=499s"
 
 engine = getEngine(TESTING)
 
@@ -27,15 +28,26 @@ engine = getEngine(TESTING)
 # outputs:
 # Summary statistics wip ...
  
-def analyzeVideoSound(url, tag):
+def analyzeVideoSound(url):
     global engine
     global TESTING
-    video = videoHelper.videoObject(url, tag, TESTING)
+    # Size of sliding window in seconds to partition video by.
+    window_size = 4
+    overlap = 2
+    video = videoHelper.videoObject(url, window_size, overlap, TESTING)
     print(video.getFilename())
+    print('Getting Audio...')
     video.getAudio()
+    print('Got Audio\n')
+    print('Getting Text...')
     video.getTextAnalysis()
+    print('Got Text\n')
+    print('Getting Amp/MFCC...')
     video.getAmpMFCCAnalysis()
+    print('Got Amp/MFCC\n')
+    print('Getting Pitch...')
     video.getPitchAnalysis()
+    print('Got Pitch\n')
 
     #    df1              df2                df4                |
     # (time, word)   (time, amplitude)   (time, pitch)          |
@@ -81,14 +93,13 @@ def prompt():
         url = input("Provide YT Link: ")
         tag = input("Provide highlight tag (True/False): ")
         print("Link: ", url)
-        print("Tag: ", tag)
 
         #Check if video already exists
         url_exists = urlExists(url, engine)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
-            analyzeVideoSound(url, tag)
+            analyzeVideoSound(url)
 
     #If user wants to upload only a CSV of videos
     elif answer == 'csv' or answer == '2':
@@ -99,26 +110,25 @@ def prompt():
         while i < len(tuplesDF.index):
             print("\n For Video #", i+1, ":")
             url = tuplesDF.loc[i, 'YT_LINK']
-            tag = tuplesDF.loc[i, 'H_TAG']
-            print("Link: ", url, " | Tag: ", tag)
+            print("Link: ", url)
 
             #Check if video already exists
             url_exists = urlExists(url, engine)
             if url_exists == True:
                 print("This video is already in the database! Did not export.")
             else:
-                analyzeVideoSound(url, tag)
+                analyzeVideoSound(url)
 
             i += 1
             print("\n --------------------------------")
 
     elif answer == 'test' or answer == '3':
         #Check if video already exists
-        url_exists = urlExists(trump_video, engine)
+        url_exists = urlExists(eddie_bravo, engine)
         if url_exists == True:
             print("This video is already in the database! Did not export.")
         else:
-            analyzeVideoSound(trump_video, True)
+            analyzeVideoSound(trump_video)
 
 
 sqlConnectionSetup(engine)
