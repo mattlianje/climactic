@@ -22,6 +22,6 @@ def formatValues(vidUrl, interval):
 # creates rows in db with interval start, end, and yt url
 def insertIntervals(vidUrl, intervals):
   rowValues = list(map(lambda x: formatValues(vidUrl, x), intervals))
-  query = "INSERT INTO labelled (url, start, end) VALUES {:}".format(",".join(rowValues))
+  query = "INSERT INTO clips (url, start, end) VALUES {:}".format(",".join(rowValues))
   dbHelper.insertRows(query)
 
