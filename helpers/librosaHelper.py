@@ -4,8 +4,10 @@ import numpy as np
 from numpy import save
 from numpy import load
 
+
 def getLibrosaPath(vidId):
   return "datastore/librosas/" + vidId + ".npy"
+
 
 # retrieve librosa file from local
 # takes filepath, returns numpy array

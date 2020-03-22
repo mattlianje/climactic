@@ -35,6 +35,7 @@ vidDuration = int(videoDownloader.getVideoDuration(videoPath))
 INTERVAL_LENGTH = 4
 OVERLAP_LENGTH = 2
 
+# Get intervals -> [[start, end], [start, end]]
 intervals = intervalCreator.getIntervals(vidDuration, INTERVAL_LENGTH, OVERLAP_LENGTH)
 # insert intervals into db
 intervalCreator.insertIntervals(vidUrl, intervals)
@@ -47,7 +48,4 @@ if not librosaHelper.librosaExists(librosaPath):
   audio, sampleRate = librosaHelper.createLibrosa(audioPath)
   librosaHelper.saveLibrosa(audio, sampleRate, librosaPath)
 
-# test df helper thingy
 
-df = dbHelper.getRowsAsDf("SELECT * FROM labelled where url = 'https://www.youtube.com/watch?v=H56iR3188P0'")
-print(df)
