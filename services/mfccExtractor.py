@@ -9,7 +9,7 @@ def getMfcc(librosaPath, intervals):
   audio, sampleRate = librosaHelper.loadLibrosa(librosaPath)
   
   # iterate intervals and calculate mfccs 
-  for idx, (start, end) in enumerate(intervals):
+  for start, end in intervals:
     # splice full audio into clip
     clip = audio[start * sampleRate : end * sampleRate]
     # extract mffcc
