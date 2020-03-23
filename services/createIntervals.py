@@ -1,5 +1,6 @@
 from helpers import dbHelper
 
+
 # returns interval start and end times
 def getIntervals(duration, intervalLength, overlapLength):
   intervals = []
@@ -16,12 +17,15 @@ def getIntervals(duration, intervalLength, overlapLength):
 
   return intervals
 
+
+# helper function to format vidUrl and interval
 def formatValues(vidUrl, interval):
   return "('{:}', {:}, {:})".format(vidUrl, interval[0], interval[1])
 
+
 # creates rows in db with interval start, end, and yt url
 def insertIntervals(vidUrl, intervals):
-  rowValues = list(map(lambda x: formatValues(vidUrl, x), intervals))
-  query = "INSERT INTO clips (url, start, end) VALUES {:}".format(",".join(rowValues))
-  dbHelper.insertRows(query)
-
+  if not dbHelper.urlExists(vidUrl):
+    rowValues = list(map(lambda x: formatValues(vidUrl, x), intervals))
+    query = "INSERT INTO clips (url, start, end) VALUES {:}".format(",".join(rowValues))
+    dbHelper.insertRows(query)

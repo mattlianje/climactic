@@ -2,6 +2,8 @@ import sys
 import pandas as pd
 import services.videoDownloader as videoDownloader
 import services.createIntervals as intervalCreator
+import services.mfccExtractor as mfccExtractor
+import services.ampExtractor as ampExtractor
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -49,4 +51,20 @@ if not librosaHelper.librosaExists(librosaPath):
   librosaHelper.saveLibrosa(audio, sampleRate, librosaPath)
 
 # Feature extraction
+print("Extracting Features...")
+# Retrieve db rows and store as a dataframe
+df = dbHelper.getRowsAsDf("SELECT * from clips where url = '{:}' ORDER BY start ASC".format(vidUrl))
 
+# Feature extraction: mfcc values
+print("Extracting mfcc...")
+mfccVals = mfccExtractor.getMfcc(librosaPath, intervals)
+df['mfcc'] = mfccVals
+
+# Feature extraction: amp values
+print("Extracting amplitudes...")
+ampVals = ampExtractor.getAmp(librosaPath, intervals)
+df['amplitude'] = ampVals
+
+# TODO: Add other feature extractions here
+
+# TODO: update db with updated dataframe

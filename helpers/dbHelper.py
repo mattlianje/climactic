@@ -23,3 +23,11 @@ def getRowsAsDf(query):
   df = pd.read_sql(query, con=engine)
   engine.dispose()
   return df
+
+
+def urlExists(vidUrl):
+  engine = create_engine(db_conn_str)
+  query = "SELECT * from clips where url = '{:}'".format(vidUrl)
+  df = pd.read_sql(query, con=engine)
+  engine.dispose()
+  return len(df) > 0
