@@ -17,3 +17,6 @@ audio-matching/mfccs-amp-intervals/**
 **.pyc
 audio-analysis/audio-files/**
 import-clips/secretsJS.js
+datastore/audio/**
+datastore/librosas/**
+datastore/videos/**
