@@ -1,11 +1,11 @@
 # Dependencies
 import numpy as np
 import pandas as pd
+import os
 import secrets
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-
 
 # Get URL for which we want to do post-processing
 url = 'https://www.youtube.com/watch?v=-5NzaAt_wY0' # We would get this as a variable but hard-coded for now
@@ -50,7 +50,8 @@ for i, (index, row) in enumerate(df.iterrows()): # Here i is rowcount, we use it
             nn_timestamps.append([highlight_start_nn, highlight_end_nn])
 
 # Save the resulting Numpy Arrays to a .npz file
-npzfilename = 'timestamps-arrays/' + url.split("v=",1)[1] + '-highlights-arrays.npz'
+os.chdir("..")
+npzfilename = 'datastore/highlights-timestamps/' + url.split("v=",1)[1] + '-highlights-arrays.npz'
 np.savez(npzfilename, rf_timestamps=rf_timestamps, nn_timestamps=nn_timestamps)
 
 # To access the arrays:
