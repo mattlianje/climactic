@@ -1,4 +1,4 @@
-import secrets.py
+from secrets import AWS_ACCES_KEY, AWS_SECRET_KEY
 import io
 import pickle
 import boto3
