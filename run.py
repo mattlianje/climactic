@@ -4,6 +4,7 @@ import services.videoDownloader as videoDownloader
 import services.createIntervals as intervalCreator
 import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
+import services.pitchExtractor as pitchExtractor
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -64,6 +65,11 @@ df['mfcc'] = mfccVals
 print("Extracting amplitudes...")
 ampVals = ampExtractor.getAmp(librosaPath, intervals)
 df['amplitude'] = ampVals
+
+# Feature extraction: pitch values
+print("Extracting pitches...")
+pitchVals = pitchExtractor.getPitch(audioPath, intervals)
+df['pitch'] = pitchVals
 
 # TODO: Add other feature extractions here
 
