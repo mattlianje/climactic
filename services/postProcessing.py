@@ -43,7 +43,7 @@ def getHighlightTimestamps(df, vidId):
 
   # Save the resulting Numpy Arrays to a .npz file
   os.chdir("..")
-  npzfilename = 'datastore/highlights-timestamps/' + vidId + '-highlights-arrays.npz'
+  npzfilename = 'datastore/highlights-timestamps/' + vidId + '.npz'
   np.savez(npzfilename, rf_timestamps=rf_timestamps, nn_timestamps=nn_timestamps)
 
 # To access the arrays:
