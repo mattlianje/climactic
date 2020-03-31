@@ -7,6 +7,7 @@ import services.ampExtractor as ampExtractor
 import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
 import services.runModels as runModels
+import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -79,8 +80,7 @@ speech2text_df = speech2text.getText(audioPath, intervals)
 df = pd.merge([df, speech2text_df], axis=1)
 
 
-# TODO: Run models 
-
+# TODO: Run predicted excitement model
 
 # Run our highlight models
 print("Running our Models")
@@ -91,5 +91,9 @@ df['pred_highlight_rf'] = rf_predictions
 print("Running Neural Network..")
 nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
 df['pred_highlight_nn'] = nn_predictions
+
+# Run Post Processing (this saves highlight-timestamps arrays to the datastore)
+highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn']]
+postProcessing.getHighlightTimestamps(highlight_pred_df, vidId)
 
 # TODO: update db with updated dataframe
