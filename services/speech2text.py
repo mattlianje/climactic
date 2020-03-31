@@ -3,18 +3,20 @@ from scipy.io import wavfile
 import pandas as pd
 from tqdm import tqdm
 from textblob import TextBlob
+import os
+import sys
 
 def getText(audioPath, intervals):
     r = sr.Recognizer()
-    raw_file = wavfile.read(audioPath)
-    file = sr.AudioFile(raw_file)
+    #raw_file = wavfile.read(audioPath)
+    file = sr.AudioFile(audioPath)
     video_title = ''
     word_list = []
 
-    for interval in tqdm(range(intervals)):
+    for interval in tqdm(intervals):
         window_start = interval[0]
         window_end = interval[1]
-        window_duration = window_start - window_end
+        window_duration = window_end - window_start
         with file as source:
             audio = r.record(source, offset=window_start, duration=window_duration)
             payload = r.recognize_google(audio, show_all=True)
@@ -45,3 +47,4 @@ def average(inputList):
     if len(inputList) != 0:
         avg = sum(inputList) / len(inputList)
     return avg
+
