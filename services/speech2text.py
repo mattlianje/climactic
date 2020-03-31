@@ -47,4 +47,3 @@ def average(inputList):
     if len(inputList) != 0:
         avg = sum(inputList) / len(inputList)
     return avg
-
