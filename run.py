@@ -77,9 +77,7 @@ df['pitch'] = pitchVals
 
 
 # Run Post Processing (this saves highlight-timestamps arrays to the datastore)
-highlight_predictions_df = df[['start', 'end']]
-highlight_predictions_df['pred_highlight_rf'] = rf_predictions
-highlight_predictions_df['pred_highlight_nn'] = nn_predictions
-postProcessing.getHighlightTimestamps(highlight_predictions_df, vidId)
+highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn']]
+postProcessing.getHighlightTimestamps(highlight_pred_df, vidId)
 
 # TODO: update db with updated dataframe
