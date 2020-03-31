@@ -3,13 +3,17 @@ import numpy as np
 import json
 import sys
 
-# USAGE python generate_video.py [path to full video] [path to highlight timestamps] [output filename]
+# USAGE python generate_video.py [path to full video] [path to highlight timestamps] ['nn' or 'rf'] [output filename]
 pathToFullVideo = sys.argv[1]
 pathToTimestamps = sys.argv[2]
-outputFilename = sys.argv[3] or "highlights.mp4"
+modelType = sys.argv[3]
+outputFilename = sys.argv[4] or "highlights.mp4"
 
 npzfile = np.load(pathToTimestamps)
-data = npzfile['rf_timestamps']
+if modelType == 'nn':
+  data = npzfile['nn_timestamps']
+else:
+  data = npzfile['rf_timestamps'] # by default use rf
 
 fullvideo = VideoFileClip(pathToFullVideo)
 
