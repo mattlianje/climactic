@@ -8,13 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 
-def getHighlightTimestamps(rf_predictions, nn_predictions):
-  # Connect to DB and get appropriate information for URL
-  db_conn_str = "mysql+pymysql://{:}:{:}@{:}/{:}".format(secrets.user, secrets.password, secrets.host, secrets.db)
-  db_conn = create_engine(db_conn_str)
-  df = pd.read_sql('SELECT * FROM predictions_table WHERE url="'+ url +'"', con=db_conn)
-  db_conn.dispose()
-
+def getHighlightTimestamps(df, vidId):
   # Loop through DFs and send highlight timestamps to arrays
   rf_timestamps, nn_timestamps = [], []
   highlight_detected_rf, highlight_detected_nn = False, False
@@ -49,7 +43,7 @@ def getHighlightTimestamps(rf_predictions, nn_predictions):
 
   # Save the resulting Numpy Arrays to a .npz file
   os.chdir("..")
-  npzfilename = 'datastore/highlights-timestamps/' + url.split("v=",1)[1] + '-highlights-arrays.npz'
+  npzfilename = 'datastore/highlights-timestamps/' + vidId + '-highlights-arrays.npz'
   np.savez(npzfilename, rf_timestamps=rf_timestamps, nn_timestamps=nn_timestamps)
 
 # To access the arrays:
