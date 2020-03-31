@@ -6,6 +6,7 @@ import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
 import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
+import services.runModels as runModels
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -77,5 +78,18 @@ print("Extracting speech 2 text data...")
 speech2text_df = speech2text.getText(audioPath, intervals)
 df = pd.merge([df, speech2text_df], axis=1)
 
+
+# TODO: Run models 
+
+
+# Run our highlight models
+print("Running our Models")
+features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excitement']]
+print("Running Random Forest..")
+rf_predictions = runModels.getRandomForestPredictions(features_df)
+df['pred_highlight_rf'] = rf_predictions
+print("Running Neural Network..")
+nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
+df['pred_highlight_nn'] = nn_predictions
 
 # TODO: update db with updated dataframe
