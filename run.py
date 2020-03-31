@@ -5,6 +5,7 @@ import services.createIntervals as intervalCreator
 import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
 import services.pitchExtractor as pitchExtractor
+import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -72,5 +73,10 @@ pitchVals = pitchExtractor.getPitch(audioPath, intervals)
 df['pitch'] = pitchVals
 
 # TODO: Add other feature extractions here
+
+
+
+# Run Post Processing (this saves highlight-timestamps arrays to the datastore)
+postProcessing.getHighlightTimestamps(rf_predictions, nn_predictions)
 
 # TODO: update db with updated dataframe
