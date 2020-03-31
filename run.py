@@ -5,6 +5,7 @@ import services.createIntervals as intervalCreator
 import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
 import services.pitchExtractor as pitchExtractor
+import services.runModels as runModels
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -72,5 +73,16 @@ pitchVals = pitchExtractor.getPitch(audioPath, intervals)
 df['pitch'] = pitchVals
 
 # TODO: Add other feature extractions here
+
+# TODO: Run models 
+
+
+# Run our highlight models
+print("Running our Models")
+features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excitement']]
+print("Running Random Forest..")
+rf_predictions = runModels.getRandomForestPredictions(features_df)
+print("Running Neural Network..")
+nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
 
 # TODO: update db with updated dataframe
