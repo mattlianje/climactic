@@ -6,11 +6,8 @@ import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
 import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
-<<<<<<< HEAD
-import services.postProcessing as postProcessing
-=======
 import services.runModels as runModels
->>>>>>> master
+import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
