@@ -4,8 +4,13 @@ import services.videoDownloader as videoDownloader
 import services.createIntervals as intervalCreator
 import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
+import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
+<<<<<<< HEAD
 import services.postProcessing as postProcessing
+=======
+import services.runModels as runModels
+>>>>>>> master
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
 
@@ -72,9 +77,23 @@ print("Extracting pitches...")
 pitchVals = pitchExtractor.getPitch(audioPath, intervals)
 df['pitch'] = pitchVals
 
-# TODO: Add other feature extractions here
+# Feature extraction: speech to text
+print("Extracting speech 2 text data...")
+speech2text_df = speech2text.getText(audioPath, intervals)
+df = pd.merge([df, speech2text_df], axis=1)
 
 
+# TODO: Run predicted excitement model
+
+# Run our highlight models
+print("Running our Models")
+features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excitement']]
+print("Running Random Forest..")
+rf_predictions = runModels.getRandomForestPredictions(features_df)
+df['pred_highlight_rf'] = rf_predictions
+print("Running Neural Network..")
+nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
+df['pred_highlight_nn'] = nn_predictions
 
 # Run Post Processing (this saves highlight-timestamps arrays to the datastore)
 highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn']]
