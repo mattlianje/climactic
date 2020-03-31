@@ -4,6 +4,7 @@ import services.videoDownloader as videoDownloader
 import services.createIntervals as intervalCreator
 import services.mfccExtractor as mfccExtractor
 import services.ampExtractor as ampExtractor
+import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
@@ -71,6 +72,10 @@ print("Extracting pitches...")
 pitchVals = pitchExtractor.getPitch(audioPath, intervals)
 df['pitch'] = pitchVals
 
-# TODO: Add other feature extractions here
+# Feature extraction: speech to text
+print("Extracting speech 2 text data...")
+speech2text_df = speech2text.getText(audioPath, intervals)
+df = pd.merge([df, speech2text_df], axis=1)
+
 
 # TODO: update db with updated dataframe
