@@ -77,13 +77,9 @@ df['pitch'] = pitchVals
 
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
-df.drop(['word', 'polarity', 'subjectivity'], axis=1)
+df.drop(columns=['word','subjectivity','polarity'], axis=1, inplace=True)
 speech2text_df = speech2text.getText(audioPath, intervals)
-# this is ugly but it works
-df['word'] = speech2text_df['word'].tolist()
-df['subjectivity'] = speech2text_df['subjectivity'].tolist()
-df['polarity'] = speech2text_df['polarity'].tolist()
-
+df = pd.concat([df, speech2text_df], axis=1)
 
 # Feature extraction: Run predicted excitement model
 print("Classifying commentator excitement...")
