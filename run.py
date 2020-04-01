@@ -76,6 +76,7 @@ df['pitch'] = pitchVals
 
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
+df.drop(['word', 'polarity', 'subjectivity'], axis=1)
 speech2text_df = speech2text.getText(audioPath, intervals)
 df = pd.concat([df, speech2text_df], axis=1)
 

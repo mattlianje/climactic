@@ -40,7 +40,7 @@ def getText(audioPath, intervals):
             'polarity': pol_avg,
         }
         word_list.append(dict(segment_dict))
-    return pd.DataFrame(word_list)
+    return pd.DataFrame(word_list, col)
 
 def average(inputList):
     avg = 0
