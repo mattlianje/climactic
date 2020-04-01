@@ -20,3 +20,4 @@ import-clips/secretsJS.js
 datastore/audio/**
 datastore/librosas/**
 datastore/videos/**
+datastore/highlights-timestamps/**

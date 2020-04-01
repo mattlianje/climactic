@@ -1,11 +1,6 @@
 # Dependencies
 import numpy as np
-import pandas as pd
 import os
-
-from helpers import secrets
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 
 
 def getHighlightTimestamps(df, vidId):
@@ -42,7 +37,6 @@ def getHighlightTimestamps(df, vidId):
               nn_timestamps.append([highlight_start_nn, highlight_end_nn])
 
   # Save the resulting Numpy Arrays to a .npz file
-  os.chdir("..")
   npzfilename = 'datastore/highlights-timestamps/' + vidId + '.npz'
   np.savez(npzfilename, rf_timestamps=rf_timestamps, nn_timestamps=nn_timestamps)
 

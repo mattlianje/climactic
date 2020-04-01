@@ -3,6 +3,8 @@ import pandas as pd
 import pickle
 
 def getRandomForestPredictions(X):
+  print('printing x')
+  print(X)
   model_datastore = 'datastore/models/highlight-models/'
   rf_model = pickle.load(open(model_datastore + 'rf_100t.sav', 'rb')) # Get model from file
   output = rf_model.predict(X)
@@ -15,4 +17,3 @@ def getNeuralNetworkPredictions(X):
   output = nn_model.predict_classes(X)
   
   return np.array(output)
-  
