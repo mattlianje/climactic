@@ -1,6 +1,5 @@
 import mysql.connector
-import secrets
-from mysql.connector import errorcode
+from helpers import secrets
 
 config = {
   'user': secrets.user,

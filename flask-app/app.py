@@ -1,6 +1,6 @@
 from flask import Flask, render_template, json, request, redirect, url_for
 from flaskext.mysql import MySQL
-import secrets
+from helpers import secrets
 import os
 
 mysql = MySQL()

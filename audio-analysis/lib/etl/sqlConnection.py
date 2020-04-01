@@ -1,6 +1,5 @@
-import pymysql
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float, Numeric
-from secrets import db_username, db_password
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Float
+from helpers.secrets import db_username, db_password
 import sqlalchemy as db
 import pandas as pd
 

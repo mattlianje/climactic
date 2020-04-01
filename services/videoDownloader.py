@@ -22,7 +22,7 @@ def downloadVid(vidUrl, vidId):
 
   if not os.path.isfile(filePath):
     print("Downloading ", vidUrl)
-    YouTube(vidUrl).streams[0].download("datastore/videos/", fileName)
+    YouTube(vidUrl).streams.first().download("datastore/videos/", fileName)
   else:
     print(vidUrl, " already downloaded")
 

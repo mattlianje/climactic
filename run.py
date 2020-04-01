@@ -87,6 +87,7 @@ print("Running our Models")
 features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excitement']]
 print("Running Random Forest..")
 rf_predictions = runModels.getRandomForestPredictions(features_df)
+print(rf_predictions)
 df['pred_highlight_rf'] = rf_predictions
 print("Running Neural Network..")
 nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
