@@ -15,4 +15,3 @@ def getNeuralNetworkPredictions(X):
   output = nn_model.predict_classes(X)
   
   return np.array(output)
-  

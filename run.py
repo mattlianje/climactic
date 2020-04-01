@@ -7,6 +7,7 @@ import services.ampExtractor as ampExtractor
 import services.speech2text as speech2text
 import services.pitchExtractor as pitchExtractor
 import services.runModels as runModels
+import services.excitementClassifier as exciteModel
 import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
@@ -77,10 +78,16 @@ df['pitch'] = pitchVals
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
 speech2text_df = speech2text.getText(audioPath, intervals)
-df = pd.concat([df, speech2text_df], axis=1)
+# this is ugly but it works
+df['word'] = speech2text_df['word'].tolist()
+df['subjectivity'] = speech2text_df['subjectivity'].tolist()
+df['polarity'] = speech2text_df['polarity'].tolist()
 
 
-# TODO: Run predicted excitement model
+# Feature extraction: Run predicted excitement model
+print("Classifying commentator excitement...")
+predExcitement = exciteModel.predictExcitement(df['mfcc'].tolist())
+df['pred_excitement'] = predExcitement
 
 # Run our highlight models
 print("Running our Models")
@@ -96,4 +103,5 @@ df['pred_highlight_nn'] = nn_predictions
 highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn']]
 postProcessing.getHighlightTimestamps(highlight_pred_df, vidId)
 
+print(df)
 # TODO: update db with updated dataframe
