@@ -31,3 +31,20 @@ def urlExists(vidUrl):
   df = pd.read_sql(query, con=engine)
   engine.dispose()
   return len(df) > 0
+
+
+# input: column name as string, dataframe with updated column
+def updateColumn(df, colName):
+  engine = create_engine(db_conn_str)
+  df.to_sql('temp_table', engine, if_exists='replace')
+  sql = """
+          UPDATE clips, temp_table
+          SET clips.{:} = temp_table.{:}
+          WHERE clips.url = temp_table.url 
+            AND clips.start = temp_table.start;
+  """.format(colName, colName)
+
+  with engine.begin() as conn:     # TRANSACTION
+      conn.execute(sql)
+
+  engine.dispose()

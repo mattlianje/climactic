@@ -64,16 +64,19 @@ df = dbHelper.getRowsAsDf("SELECT * from clips where url = '{:}' ORDER BY start 
 print("Extracting mfcc...")
 mfccVals = mfccExtractor.getMfcc(librosaPath, intervals)
 df['mfcc'] = mfccVals
+dbHelper.updateColumn(df, 'mfcc')
 
 # Feature extraction: amp values
 print("Extracting amplitudes...")
 ampVals = ampExtractor.getAmp(librosaPath, intervals)
 df['amplitude'] = ampVals
+dbHelper.updateColumn(df, 'amplitude')
 
 # Feature extraction: pitch values
 print("Extracting pitches...")
 pitchVals = pitchExtractor.getPitch(audioPath, intervals)
 df['pitch'] = pitchVals
+dbHelper.updateColumn(df, 'pitch')
 
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
@@ -82,12 +85,16 @@ speech2text_df = speech2text.getText(audioPath, intervals)
 df['word'] = speech2text_df['word'].tolist()
 df['subjectivity'] = speech2text_df['subjectivity'].tolist()
 df['polarity'] = speech2text_df['polarity'].tolist()
+dbHelper.updateColumn(df, 'word')
+dbHelper.updateColumn(df, 'subjectivity')
+dbHelper.updateColumn(df, 'polarity')
 
 
 # Feature extraction: Run predicted excitement model
 print("Classifying commentator excitement...")
 predExcitement = exciteModel.predictExcitement(df['mfcc'].tolist())
 df['pred_excitement'] = predExcitement
+dbHelper.updateColumn(df, 'pred_excitement')
 
 # Run our highlight models
 print("Running our Models")
@@ -95,13 +102,14 @@ features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excite
 print("Running Random Forest..")
 rf_predictions = runModels.getRandomForestPredictions(features_df)
 df['pred_highlight_rf'] = rf_predictions
+dbHelper.updateColumn(df, 'pred_highlight_rf')
+
 print("Running Neural Network..")
 nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
 df['pred_highlight_nn'] = nn_predictions
+dbHelper.updateColumn(df, 'pred_highlight_nn')
 
 # Run Post Processing (this saves highlight-timestamps arrays to the datastore)
 highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn']]
 postProcessing.getHighlightTimestamps(highlight_pred_df, vidId)
 
-print(df)
-# TODO: update db with updated dataframe
