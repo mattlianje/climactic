@@ -19,6 +19,16 @@ import helpers.dbHelper as dbHelper
 # Get YT url
 vidUrl = sys.argv[1]
 
+# Testing flag ... will not update db if PROD = FALSE
+PROD = False
+if len(sys.argv) > 2:
+  if sys.argv[2] == 'prod':
+    PROD = True
+# python run.py test -> runs the Trump video and NOT write to db
+if sys.argv[1] == 'test':
+  # Trump video url
+  vidUrl = 'https://www.youtube.com/watch?v=JZRXESV3R74'
+
 # If no url provided exit
 if not vidUrl:
   print('Please enter a youtube video url')
@@ -59,6 +69,13 @@ if not librosaHelper.librosaExists(librosaPath):
 print("Extracting Features...")
 # Retrieve db rows and store as a dataframe
 df = dbHelper.getRowsAsDf("SELECT * from clips where url = '{:}' ORDER BY start ASC".format(vidUrl))
+# Drop null columns with features to be populated
+feature_list = ['mfcc', 'amplitude', 'pitch', 'word', 'subjectivity', 'polarity', 'pred_excitement', 'pred_highlight_rf', 'pred_highlight_nn']
+df.drop(columns=feature_list, axis=1, inplace=True)
+
+# Feature extraction: add video title
+df['video_title'] = videoDownloader.getVideoTitle(vidUrl)
+print(videoDownloader.getVideoTitle(vidUrl))
 
 # Feature extraction: mfcc values
 print("Extracting mfcc...")
@@ -77,7 +94,6 @@ df['pitch'] = pitchVals
 
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
-df.drop(columns=['word','subjectivity','polarity'], axis=1, inplace=True)
 speech2text_df = speech2text.getText(audioPath, intervals)
 df = pd.concat([df, speech2text_df], axis=1)
 
@@ -93,6 +109,7 @@ print("Running Random Forest..")
 rf_predictions = runModels.getRandomForestPredictions(features_df)
 print(rf_predictions)
 df['pred_highlight_rf'] = rf_predictions
+
 print("Running Neural Network..")
 nn_predictions = runModels.getNeuralNetworkPredictions(features_df)
 df['pred_highlight_nn'] = nn_predictions
@@ -102,4 +119,9 @@ highlight_pred_df = df[['start', 'end', 'pred_highlight_rf', 'pred_highlight_nn'
 postProcessing.getHighlightTimestamps(highlight_pred_df, vidId)
 
 print(df)
-# TODO: update db with updated dataframe
+
+# Write the new features to db
+if PROD:
+  for feature in feature_list:
+    print('sending {} to db ...'.format(feature))
+    dbHelper.updateColumn(df, feature)

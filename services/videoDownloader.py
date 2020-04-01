@@ -15,6 +15,9 @@ def getVideoDuration(videoPath):
   video = VideoFileClip(videoPath)
   return video.duration
 
+def getVideoTitle(vidUrl):
+  video = YouTube(vidUrl)
+  return video.title
 
 def downloadVid(vidUrl, vidId):
   fileName = vidId
