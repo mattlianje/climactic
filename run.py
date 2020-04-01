@@ -77,7 +77,7 @@ df['pitch'] = pitchVals
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
 speech2text_df = speech2text.getText(audioPath, intervals)
-df = pd.merge([df, speech2text_df], axis=1)
+df = pd.concat([df, speech2text_df], axis=1)
 
 
 # TODO: Run predicted excitement model
