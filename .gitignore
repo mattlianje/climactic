@@ -21,3 +21,4 @@ datastore/audio/**
 datastore/librosas/**
 datastore/videos/**
 video-output/highlight-videos/*
+datastore/highlights-timestamps/**
