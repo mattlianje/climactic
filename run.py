@@ -11,6 +11,7 @@ import services.excitementClassifier as exciteModel
 import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
+from sklearn import preprocessing
 
 # This is the commander, it will string together all the services 
 # INPUT: youtube url
@@ -55,6 +56,12 @@ if not librosaHelper.librosaExists(librosaPath):
   audio, sampleRate = librosaHelper.createLibrosa(audioPath)
   librosaHelper.saveLibrosa(audio, sampleRate, librosaPath)
 
+else:
+  audio, sampleRate = librosaHelper.loadLibrosa(librosaPath)
+
+# normalize audio
+audio = preprocessing.scale(audio)
+
 # Feature extraction
 print("Extracting Features...")
 # Retrieve db rows and store as a dataframe
@@ -62,13 +69,13 @@ df = dbHelper.getRowsAsDf("SELECT * from clips where url = '{:}' ORDER BY start 
 
 # Feature extraction: mfcc values
 print("Extracting mfcc...")
-mfccVals = mfccExtractor.getMfcc(librosaPath, intervals)
+mfccVals = mfccExtractor.getMfcc(audio, sampleRate, intervals)
 df['mfcc'] = mfccVals
 dbHelper.updateColumn(df, 'mfcc')
 
 # Feature extraction: amp values
 print("Extracting amplitudes...")
-ampVals = ampExtractor.getAmp(librosaPath, intervals)
+ampVals = ampExtractor.getAmp(audio, sampleRate, intervals)
 df['amplitude'] = ampVals
 dbHelper.updateColumn(df, 'amplitude')
 

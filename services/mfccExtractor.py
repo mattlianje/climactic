@@ -2,11 +2,8 @@ import librosa
 import numpy as np
 import helpers.librosaHelper as librosaHelper
 
-def getMfcc(librosaPath, intervals):
+def getMfcc(audio, sampleRate, intervals):
   output = []
-
-  # retrieve librosa file
-  audio, sampleRate = librosaHelper.loadLibrosa(librosaPath)
   
   # iterate intervals and calculate mfccs 
   for start, end in intervals:
