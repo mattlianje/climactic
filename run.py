@@ -69,9 +69,6 @@ if not librosaHelper.librosaExists(librosaPath):
 print("Extracting Features...")
 # Retrieve db rows and store as a dataframe
 df = dbHelper.getRowsAsDf("SELECT * from clips where url = '{:}' ORDER BY start ASC".format(vidUrl))
-# Drop null columns with features to be populated
-feature_list = ['mfcc', 'amplitude', 'pitch', 'word', 'subjectivity', 'polarity', 'pred_excitement', 'pred_highlight_rf', 'pred_highlight_nn']
-df.drop(columns=feature_list, axis=1, inplace=True)
 
 # Feature extraction: add video title
 df['video_title'] = videoDownloader.getVideoTitle(vidUrl)
@@ -95,7 +92,9 @@ df['pitch'] = pitchVals
 # Feature extraction: speech to text
 print("Extracting speech 2 text data...")
 speech2text_df = speech2text.getText(audioPath, intervals)
-df = pd.concat([df, speech2text_df], axis=1)
+df['word'] = speech2text_df['word'].tolist()
+df['subjectivity'] = speech2text_df['subjectivity'].tolist()
+df['polarity'] = speech2text_df['polarity'].tolist()
 
 # Feature extraction: Run predicted excitement model
 print("Classifying commentator excitement...")
@@ -107,7 +106,6 @@ print("Running our Models")
 features_df = df[['pitch', 'amplitude', 'subjectivity', 'polarity', 'pred_excitement']]
 print("Running Random Forest..")
 rf_predictions = runModels.getRandomForestPredictions(features_df)
-print(rf_predictions)
 df['pred_highlight_rf'] = rf_predictions
 
 print("Running Neural Network..")
@@ -122,6 +120,6 @@ print(df)
 
 # Write the new features to db
 if PROD:
-  for feature in feature_list:
-    print('sending {} to db ...'.format(feature))
-    dbHelper.updateColumn(df, feature)
+  for col in df.columns:
+    print('sending {} to db ...'.format(col))
+    dbHelper.updateColumn(df, col)
