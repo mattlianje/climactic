@@ -48,3 +48,11 @@ def updateColumn(df, colName):
       conn.execute(sql)
 
   engine.dispose()
+
+
+def getIntervals(url):
+  engine = create_engine(db_conn_str)
+  query = "SELECT * from clips where url = '{:}'".format(url)
+  df = pd.read_sql(query, con=engine)
+  engine.dispose()
+  return zip(df['start'].tolist(), df['end'].tolist())
