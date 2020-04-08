@@ -12,6 +12,7 @@ import services.excitementClassifier as exciteModel
 import services.postProcessing as postProcessing
 import helpers.librosaHelper as librosaHelper
 import helpers.dbHelper as dbHelper
+from sklearn import preprocessing
 
 # This is the commander, it will string together all the services 
 # @input <- youtube url
@@ -120,5 +121,3 @@ def run(vidUrl):
 
     print(df)
     return df
-
-
