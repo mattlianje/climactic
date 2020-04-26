@@ -20,5 +20,7 @@ import-clips/secretsJS.js
 datastore/audio/**
 datastore/librosas/**
 datastore/videos/**
+datastore/labelled-clips/**
 video-output/highlight-videos/*
 datastore/highlights-timestamps/**
+.ipynb_checkpoints/**
