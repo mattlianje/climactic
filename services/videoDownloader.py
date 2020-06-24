@@ -15,6 +15,9 @@ def getVideoDuration(videoPath):
   video = VideoFileClip(videoPath)
   return video.duration
 
+def getVideoTitle(vidUrl):
+  video = YouTube(vidUrl)
+  return video.title
 
 def downloadVid(vidUrl, vidId):
   fileName = vidId
@@ -22,7 +25,7 @@ def downloadVid(vidUrl, vidId):
 
   if not os.path.isfile(filePath):
     print("Downloading ", vidUrl)
-    YouTube(vidUrl).streams[0].download("datastore/videos/", fileName)
+    YouTube(vidUrl).streams.first().download("datastore/videos/", fileName)
   else:
     print(vidUrl, " already downloaded")
 
